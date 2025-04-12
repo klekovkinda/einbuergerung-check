@@ -24,7 +24,7 @@ jobs:
           echo "Chrome version: $CHROME_VERSION"
           DRIVER_NAME=LATEST_RELEASE_$(echo $CHROME_VERSION | cut -d'.' -f1)
           wget -N https://googlechromelabs.github.io/chrome-for-testing/$DRIVER_NAME
-          unzip DRIVER_NAME
+          unzip $DRIVER_NAME
           sudo mv chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
           chromedriver --version
