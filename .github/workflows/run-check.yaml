@@ -3,6 +3,9 @@ name: Run Einbürgerung Check
 on:
   workflow_dispatch: # Added to allow manual triggering
 
+permissions:
+  contents: write # Grant write access to repository contents
+
 jobs:
   run-check:
     runs-on: ubuntu-latest
