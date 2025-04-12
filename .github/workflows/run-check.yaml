@@ -6,6 +6,7 @@ on:
 jobs:
   run-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 360
 
     steps:
       - name: Checkout code
@@ -37,4 +38,3 @@ jobs:
 
       - name: Run Einbürgerung Check
         run: python einbuergerung-check.py
-

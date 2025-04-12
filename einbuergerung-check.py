@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.options import Options
 
 URL = "https://service.berlin.de/terminvereinbarung/termin/all/351180/"
 CHECK_INTERVAL = 60
+DELTA_INTERVAL = 5
 
 options = Options()
 options.add_argument("--headless")
@@ -14,9 +15,10 @@ options.add_argument("--no-sandbox")
 
 driver = webdriver.Chrome(options=options)
 
+
 def check_for_appointment():
     driver.get(URL)
-    time.sleep(3)
+    time.sleep(DELTA_INTERVAL)
 
     page_text = driver.page_source
 
@@ -40,7 +42,7 @@ try:
         print("Checking...", end="", flush=True)
         if check_for_appointment():
             break
-        time.sleep(CHECK_INTERVAL)
+        time.sleep(CHECK_INTERVAL + DELTA_INTERVAL)
 
 finally:
     driver.quit()
