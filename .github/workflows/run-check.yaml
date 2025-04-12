@@ -25,6 +25,8 @@ jobs:
           if [ -z "$DRIVER_VERSION" ]; then
             DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
           fi
+          echo "Chrome version: $CHROME_VERSION"
+          echo "Driver version: $DRIVER_VERSION"
           wget -N https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
