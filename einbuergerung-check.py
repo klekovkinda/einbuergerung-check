@@ -1,10 +1,8 @@
 import sys
-import tempfile
 import time
 from datetime import datetime
 
 from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.options import Options
 
 URL = "https://service.berlin.de/terminvereinbarung/termin/all/351180/"
@@ -14,17 +12,8 @@ options = Options()
 options.add_argument("--headless")
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
-options.binary_location = "/usr/local/bin/chrome"  # Use Chrome for Testing binary
 
-# Create a temporary directory for user data
-temp_user_data_dir = tempfile.mkdtemp()
-options.add_argument(f"--user-data-dir={temp_user_data_dir}")
-
-try:
-    driver = webdriver.Chrome(options=options)
-except WebDriverException as e:
-    print(f"❌ Failed to initialize WebDriver: {e}")
-    sys.exit(1)
+driver = webdriver.Chrome(options=options)
 
 
 def check_for_appointment():
