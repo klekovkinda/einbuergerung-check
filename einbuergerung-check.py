@@ -5,6 +5,7 @@ from datetime import datetime
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import WebDriverException
 
 URL = "https://service.berlin.de/terminvereinbarung/termin/all/351180/"
 CHECK_INTERVAL = 60
@@ -14,7 +15,11 @@ options.add_argument("--headless")
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
 
-driver = webdriver.Chrome(options=options)
+try:
+    driver = webdriver.Chrome(options=options)
+except WebDriverException as e:
+    print(f"❌ Failed to initialize WebDriver: {e}")
+    sys.exit(1)
 
 def check_for_appointment():
     driver.get(URL)
@@ -40,11 +45,7 @@ try:
     while True:
         print("Checking...", end="", flush=True)
         if check_for_appointment():
-            os.system('say "There is available appointment!"')
-            time.sleep(CHECK_INTERVAL+10)
-            os.system(f"open {URL}")
             break
-
         for remaining in range(CHECK_INTERVAL, 0, -1):
             sys.stdout.write(f"\rNext check in {remaining} seconds...")
             sys.stdout.flush()
