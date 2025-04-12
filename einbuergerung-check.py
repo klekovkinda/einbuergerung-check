@@ -14,6 +14,7 @@ options = Options()
 options.add_argument("--headless")
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
+options.binary_location = "/usr/local/bin/chrome"  # Use Chrome for Testing binary
 
 try:
     driver = webdriver.Chrome(options=options)
