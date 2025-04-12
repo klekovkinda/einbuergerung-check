@@ -14,7 +14,6 @@ options.add_argument("--no-sandbox")
 
 driver = webdriver.Chrome(options=options)
 
-
 def check_for_appointment():
     driver.get(URL)
     time.sleep(3)
@@ -41,9 +40,7 @@ try:
         print("Checking...", end="", flush=True)
         if check_for_appointment():
             break
-        for remaining in range(CHECK_INTERVAL, 0, -1):
-            print(f"Next check in {remaining} seconds...")
-            time.sleep(1)
+        time.sleep(CHECK_INTERVAL)
 
 finally:
     driver.quit()
