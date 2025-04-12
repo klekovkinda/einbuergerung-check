@@ -1,13 +1,11 @@
-import os
-import time
 import sys
 import tempfile
-import shutil
+import time
 from datetime import datetime
 
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.chrome.options import Options
 
 URL = "https://service.berlin.de/terminvereinbarung/termin/all/351180/"
 CHECK_INTERVAL = 60
@@ -28,6 +26,7 @@ except WebDriverException as e:
     print(f"❌ Failed to initialize WebDriver: {e}")
     sys.exit(1)
 
+
 def check_for_appointment():
     driver.get(URL)
     time.sleep(3)
@@ -47,6 +46,7 @@ def check_for_appointment():
         with open(filename, "w", encoding="utf-8") as file:
             file.write(page_text)
         return True
+
 
 try:
     while True:
