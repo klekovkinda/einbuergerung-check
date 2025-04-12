@@ -1,4 +1,3 @@
-import sys
 import time
 from datetime import datetime
 
@@ -43,10 +42,8 @@ try:
         if check_for_appointment():
             break
         for remaining in range(CHECK_INTERVAL, 0, -1):
-            sys.stdout.write(f"\rNext check in {remaining} seconds...")
-            sys.stdout.flush()
+            print(f"Next check in {remaining} seconds...")
             time.sleep(1)
-        sys.stdout.write("\r" + " " * 50 + "\r")
 
 finally:
     driver.quit()
