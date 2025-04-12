@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import datetime
 
@@ -31,7 +32,8 @@ def check_for_appointment():
     else:
         print("✅ Looks like appointments have appeared!")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"index_{timestamp}.html"
+        os.makedirs("html", exist_ok=True)
+        filename = f"html/index_{timestamp}.html"
         with open(filename, "w", encoding="utf-8") as file:
             file.write(page_text)
         return True
