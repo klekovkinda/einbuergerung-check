@@ -3,8 +3,8 @@ import telebot
 import os
 
 URL = "https://service.berlin.de/terminvereinbarung/termin/all/351180/"
-TELEGRAM_BOT_TOKEN = "7998334991:AAEecRzmRgEkvWUPesAcrnB-5djepTM4oEU"#os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = "451959895"#os.getenv("TELEGRAM_CHAT_ID")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 
