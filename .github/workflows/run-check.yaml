@@ -1,7 +1,9 @@
 name: Run Einbürgerung Check
 
 on:
-  workflow_dispatch: # Added to allow manual triggering
+  schedule:
+    - cron: "*/5 * * * *" # Run every 5 minutes
+  workflow_dispatch: # Allow manual triggering
 
 permissions:
   contents: write # Grant write access to repository contents
