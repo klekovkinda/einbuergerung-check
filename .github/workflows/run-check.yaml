@@ -56,3 +56,4 @@ jobs:
           else
             git commit -m "Add new HTML snapshot of available appointments"
             git push
+          fi
