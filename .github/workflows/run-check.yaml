@@ -1,7 +1,9 @@
 name: Run Einbürgerung Check
 
 on:
-  workflow_dispatch: # Added to allow manual triggering
+  schedule:
+    - cron: "*/5 * * * *" # Run every 5 minutes
+  workflow_dispatch: # Allow manual triggering
 
 permissions:
   contents: write # Grant write access to repository contents
@@ -12,11 +14,6 @@ jobs:
     timeout-minutes: 360
 
     steps:
-      - name: Notify run check
-        run:  |
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d "text=Start check!"
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -32,7 +29,7 @@ jobs:
           CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+' | head -1)
           echo "Chrome version: $CHROME_VERSION"
           DRIVER_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$(echo $CHROME_VERSION | cut -d'.' -f1))
-          echo "Driver version: DRIVER_VERSION"
+          echo "Driver version: $DRIVER_VERSION"
           wget -N https://storage.googleapis.com/chrome-for-testing-public/$DRIVER_VERSION/linux64/chromedriver-linux64.zip
           unzip chromedriver-linux64.zip
           sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
@@ -45,18 +42,18 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Einbürgerung Check
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python einbuergerung-check.py
-
-      - name: Notify run check
-        run: |
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d "text=Go and book your appointment now! \n https://service.berlin.de/terminvereinbarung/termin/all/351180/"
 
       - name: Commit and push HTML changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add html/
-          git commit -m "Add new HTML snapshot of available appointments"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Add new HTML snapshot of available appointments"
+            git push
