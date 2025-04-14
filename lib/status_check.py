@@ -19,6 +19,12 @@ def check_for_appointment(url):
         driver.quit()
     return check_result
 
+def save_html(page_text):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    os.makedirs("html", exist_ok=True)
+    filename = f"html/index_{timestamp}.html"
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(page_text)
 
 def check_appointment(url):
     driver.get(url)
@@ -26,7 +32,11 @@ def check_appointment(url):
 
     page_text = driver.page_source
 
-    if "Leider sind aktuell keine Termine für ihre Auswahl verfügbar." in page_text:
+    if "An diesem Tag einen Termin buchen." in page_text:
+        print("✅ Looks like appointments have appeared!")
+        save_html(page_text)
+        return True
+    elif "Leider sind aktuell keine Termine für ihre Auswahl verfügbar." in page_text:
         print("❌ No appointments yet...")
         return False
     elif "Forbidden access" in page_text:
@@ -39,10 +49,6 @@ def check_appointment(url):
         print("⚠️ Please try again later.")
         return False
     else:
-        print("✅ Looks like appointments have appeared!")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        os.makedirs("html", exist_ok=True)
-        filename = f"html/index_{timestamp}.html"
-        with open(filename, "w", encoding="utf-8") as file:
-            file.write(page_text)
-        return True
+        print("✅ Unknown page detected. Saving for analysis.")
+        save_html(page_text)
+        return False
