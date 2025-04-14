@@ -35,6 +35,9 @@ def check_appointment(url):
     elif "Zu viele Zugriffe" in page_text:
         print("⚠️ Too many requests. Please wait before trying again.")
         return False
+    elif "Bitte probieren Sie es zu einem späteren Zeitpunkt erneut." in page_text:
+        print("⚠️ Please try again later.")
+        return False
     else:
         print("✅ Looks like appointments have appeared!")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
