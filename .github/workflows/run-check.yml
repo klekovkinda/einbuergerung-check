@@ -44,7 +44,7 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python einbuergerung-check.py
+        run: python einbuergerung_check.py
 
       - name: Commit and push HTML changes
         run: |
