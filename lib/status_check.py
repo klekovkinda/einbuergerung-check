@@ -12,9 +12,9 @@ options.add_argument("--no-sandbox")
 driver = webdriver.Chrome(options=options)
 
 
-def check_for_appointment(url):
+def check_for_appointment(url, delay=3, saving_for_analysis=False):
     try:
-        check_result = check_appointment(url)
+        check_result = check_appointment(url, delay, saving_for_analysis)
     finally:
         driver.quit()
     return check_result
@@ -26,15 +26,16 @@ def save_html(page_text):
     with open(filename, "w", encoding="utf-8") as file:
         file.write(page_text)
 
-def check_appointment(url):
+def check_appointment(url, delay, saving_for_analysis):
     driver.get(url)
-    time.sleep(3)
+    time.sleep(delay)
 
     page_text = driver.page_source
 
-    if "An diesem Tag einen Termin buchen." in page_text:
+    if "Bitte wählen Sie ein Datum" in page_text:
         print("✅ Looks like appointments have appeared!")
-        save_html(page_text)
+        if saving_for_analysis:
+            save_html(page_text)
         return True
     elif "Leider sind aktuell keine Termine für ihre Auswahl verfügbar." in page_text:
         print("❌ No appointments yet...")

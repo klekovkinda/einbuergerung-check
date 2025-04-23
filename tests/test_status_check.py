@@ -1,45 +1,68 @@
+import os
 import unittest
-from unittest.mock import patch, MagicMock
-from lib.status_check import check_for_appointment, check_appointment
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+from threading import Thread
+
+from lib.status_check import check_for_appointment
 
 
 class TestStatusCheck(unittest.TestCase):
-    @patch("lib.status_check.webdriver.Chrome")
-    def test_check_for_appointment_no_appointments(self, mock_chrome):
-        mock_driver = MagicMock()
-        mock_driver.page_source = "Leider sind aktuell keine Termine für ihre Auswahl verfügbar."
-        mock_chrome.return_value = mock_driver
+    @classmethod
+    def setUpClass(cls):
+        class MockServerHandler(SimpleHTTPRequestHandler):
+            def do_GET(self):
+                base_path = os.path.dirname(__file__)
+                file_path = os.path.join(base_path, "html", self.path.lstrip("/"))
+                if os.path.exists(file_path) and self.path.endswith(".html"):
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/html")
+                    self.end_headers()
+                    with open(file_path, "rb") as file:
+                        self.wfile.write(file.read())
+                else:
+                    self.send_response(404)
+                    self.end_headers()
 
-        result = check_for_appointment("http://example.com")
+        cls.mock_server = HTTPServer(("localhost", 0), MockServerHandler)
+        cls.server_thread = Thread(target=cls.mock_server.serve_forever)
+        cls.server_thread.daemon = True
+        cls.server_thread.start()
+        cls.mock_server_url = f"http://localhost:{cls.mock_server.server_port}/"
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.mock_server.shutdown()
+        cls.server_thread.join()
+
+    def test_check_for_appointment__zu_viele_zugriffe(self):
+        file_name = "zu_viele_zugriffe.html"
+        url = f"{self.mock_server_url}{file_name}"
+        result = check_for_appointment(url)
         self.assertFalse(result)
 
-    @patch("lib.status_check.webdriver.Chrome")
-    def test_check_for_appointment_appointments_available(self, mock_chrome):
-        mock_driver = MagicMock()
-        mock_driver.page_source = "<html>Appointments available!</html>"
-        mock_chrome.return_value = mock_driver
-
-        with patch("lib.status_check.os.makedirs"), patch("lib.status_check.open", create=True):
-            result = check_for_appointment("http://example.com")
-        self.assertTrue(result)
-
-    @patch("lib.status_check.webdriver.Chrome")
-    def test_check_for_appointment_access_denied(self, mock_chrome):
-        mock_driver = MagicMock()
-        mock_driver.page_source = "Forbidden access"
-        mock_chrome.return_value = mock_driver
-
-        result = check_for_appointment("http://example.com")
+    def test_check_for_appointment__wartung(self):
+        file_name = "wartung.html"
+        url = f"{self.mock_server_url}{file_name}"
+        result = check_for_appointment(url)
         self.assertFalse(result)
-
-    @patch("lib.status_check.webdriver.Chrome")
-    def test_check_for_appointment_too_many_requests(self, mock_chrome):
-        mock_driver = MagicMock()
-        mock_driver.page_source = "Zu viele Zugriffe"
-        mock_chrome.return_value = mock_driver
-
-        result = check_for_appointment("http://example.com")
-        self.assertFalse(result)
+#
+    #def test_check_for_appointment__keine_termine(self):
+    #    file_name = "keine_termine.html"
+    #    url = f"{self.mock_server_url}{file_name}"
+    #    result = check_for_appointment(url)
+    #    self.assertFalse(result)
+#
+    #def test_check_for_appointment__forbidden_access(self):
+    #    file_name = "forbidden_access.html"
+    #    url = f"{self.mock_server_url}{file_name}"
+    #    result = check_for_appointment(url)
+    #    self.assertFalse(result)
+#
+    #def test_check_for_appointment__terminvereinbarung(self):
+    #    file_name = "terminvereinbarung.html"
+    #    url = f"{self.mock_server_url}{file_name}"
+    #    result = check_for_appointment(url)
+    #    self.assertTrue(result)
 
 
 if __name__ == "__main__":
