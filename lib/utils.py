@@ -18,7 +18,6 @@ def get_html_page(url, delay=3):
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
 
-    # Use a context manager to ensure the WebDriver is properly closed
     with webdriver.Chrome(options=options) as driver:
         driver.get(url)
         time.sleep(delay)
@@ -26,3 +25,8 @@ def get_html_page(url, delay=3):
 
     return page_text
 
+def build_markdown_message(available_dates):
+    lst = ""
+    for available_date in available_dates:
+        lst += f"- [{available_date.title}](https://service.berlin.de/{available_date.link})\n"
+    return f"Go and book your appointment now! Available dates:\n{lst}"

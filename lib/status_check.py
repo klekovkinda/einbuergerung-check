@@ -1,9 +1,14 @@
+from lib.extract_dates import extract_available_dates
 from lib.utils import save_html, get_html_page
 
 
 def check_for_appointment(url, delay=0, saving_for_analysis=False):
     page_text = get_html_page(url, delay)
-    return check_on_page(page_text, saving_for_analysis)
+    appointment_available = check_on_page(page_text, saving_for_analysis)
+    available_dates = []
+    if appointment_available:
+        available_dates = extract_available_dates(page_text)
+    return appointment_available, available_dates
 
 
 def check_on_page(page_text, saving_for_analysis=False):
