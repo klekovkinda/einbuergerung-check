@@ -32,6 +32,7 @@ class TestStatusCheck(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.mock_server.shutdown()
+        cls.mock_server.server_close()  # Ensure the server's socket is closed
         cls.server_thread.join()
 
     def test_check_for_appointment__zu_viele_zugriffe(self):
@@ -45,25 +46,26 @@ class TestStatusCheck(unittest.TestCase):
         url = f"{self.mock_server_url}{file_name}"
         result = check_for_appointment(url)
         self.assertFalse(result)
-#
-    #def test_check_for_appointment__keine_termine(self):
-    #    file_name = "keine_termine.html"
-    #    url = f"{self.mock_server_url}{file_name}"
-    #    result = check_for_appointment(url)
-    #    self.assertFalse(result)
-#
-    #def test_check_for_appointment__forbidden_access(self):
-    #    file_name = "forbidden_access.html"
-    #    url = f"{self.mock_server_url}{file_name}"
-    #    result = check_for_appointment(url)
-    #    self.assertFalse(result)
-#
-    #def test_check_for_appointment__terminvereinbarung(self):
-    #    file_name = "terminvereinbarung.html"
-    #    url = f"{self.mock_server_url}{file_name}"
-    #    result = check_for_appointment(url)
-    #    self.assertTrue(result)
+
+    def test_check_for_appointment__keine_termine(self):
+        file_name = "keine_termine.html"
+        url = f"{self.mock_server_url}{file_name}"
+        result = check_for_appointment(url)
+        self.assertFalse(result)
+
+    def test_check_for_appointment__forbidden_access(self):
+        file_name = "forbidden_access.html"
+        url = f"{self.mock_server_url}{file_name}"
+        result = check_for_appointment(url)
+        self.assertFalse(result)
+
+    def test_check_for_appointment__terminvereinbarung(self):
+        file_name = "terminvereinbarung.html"
+        url = f"{self.mock_server_url}{file_name}"
+        result = check_for_appointment(url)
+        self.assertTrue(result)
 
 
 if __name__ == "__main__":
     unittest.main()
+

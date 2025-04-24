@@ -1,37 +1,12 @@
-import os
-import time
-from datetime import datetime
-
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-
-options = Options()
-options.add_argument("--headless")
-options.add_argument("--disable-gpu")
-options.add_argument("--no-sandbox")
-driver = webdriver.Chrome(options=options)
+from lib.utils import save_html, get_html_page
 
 
-def check_for_appointment(url, delay=3, saving_for_analysis=False):
-    try:
-        check_result = check_appointment(url, delay, saving_for_analysis)
-    finally:
-        driver.quit()
-    return check_result
+def check_for_appointment(url, delay=0, saving_for_analysis=False):
+    page_text = get_html_page(url, delay)
+    return check_on_page(page_text, saving_for_analysis)
 
-def save_html(page_text):
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    os.makedirs("html", exist_ok=True)
-    filename = f"html/index_{timestamp}.html"
-    with open(filename, "w", encoding="utf-8") as file:
-        file.write(page_text)
 
-def check_appointment(url, delay, saving_for_analysis):
-    driver.get(url)
-    time.sleep(delay)
-
-    page_text = driver.page_source
-
+def check_on_page(page_text, saving_for_analysis=False):
     if "Bitte wählen Sie ein Datum" in page_text:
         print("✅ Looks like appointments have appeared!")
         if saving_for_analysis:
