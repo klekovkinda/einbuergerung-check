@@ -59,6 +59,12 @@ class TestStatusCheck(unittest.TestCase):
         result = check_for_appointment(url)
         self.assertFalse(result)
 
+    def test_this_site_can_not_be_reached(self):
+        file_name = "this_site_can_not_be_reached.html"
+        url = f"{self.mock_server_url}{file_name}"
+        result = check_for_appointment(url)
+        self.assertFalse(result)
+
     def test_check_for_appointment__terminvereinbarung(self):
         file_name = "terminvereinbarung.html"
         url = f"{self.mock_server_url}{file_name}"

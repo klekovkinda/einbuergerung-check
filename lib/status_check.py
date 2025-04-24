@@ -21,6 +21,9 @@ def check_on_page(page_text, saving_for_analysis=False):
     elif "Zu viele Zugriffe" in page_text:
         print("⚠️ Too many requests. Please wait before trying again.")
         return False
+    elif "This site can’t be reached" in page_text:
+        print("⚠️ The webpage might be temporarily down or it may have moved permanently to a new web address.")
+        return False
     elif "Bitte probieren Sie es zu einem späteren Zeitpunkt erneut." in page_text:
         print("⚠️ Please try again later.")
         return False
