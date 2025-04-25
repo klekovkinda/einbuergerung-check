@@ -38,38 +38,44 @@ class TestStatusCheck(unittest.TestCase):
     def test_check_for_appointment__zu_viele_zugriffe(self):
         file_name = "zu_viele_zugriffe.html"
         url = f"{self.mock_server_url}{file_name}"
-        result = check_for_appointment(url)
-        self.assertFalse(result)
+        appointment_available, available_dates = check_for_appointment(url)
+        self.assertFalse(appointment_available)
+        self.assertEqual(available_dates, [])
 
     def test_check_for_appointment__wartung(self):
         file_name = "wartung.html"
         url = f"{self.mock_server_url}{file_name}"
-        result = check_for_appointment(url)
-        self.assertFalse(result)
+        appointment_available, available_dates = check_for_appointment(url)
+        self.assertFalse(appointment_available)
+        self.assertEqual(available_dates, [])
 
     def test_check_for_appointment__keine_termine(self):
         file_name = "keine_termine.html"
         url = f"{self.mock_server_url}{file_name}"
-        result = check_for_appointment(url)
-        self.assertFalse(result)
+        appointment_available, available_dates = check_for_appointment(url)
+        self.assertFalse(appointment_available)
+        self.assertEqual(available_dates, [])
 
     def test_check_for_appointment__forbidden_access(self):
         file_name = "forbidden_access.html"
         url = f"{self.mock_server_url}{file_name}"
-        result = check_for_appointment(url)
-        self.assertFalse(result)
+        appointment_available, available_dates = check_for_appointment(url)
+        self.assertFalse(appointment_available)
+        self.assertEqual(available_dates, [])
 
     def test_this_site_can_not_be_reached(self):
         file_name = "this_site_can_not_be_reached.html"
         url = f"{self.mock_server_url}{file_name}"
-        result = check_for_appointment(url)
-        self.assertFalse(result)
+        appointment_available, available_dates = check_for_appointment(url)
+        self.assertFalse(appointment_available)
+        self.assertEqual(available_dates, [])
 
     def test_check_for_appointment__terminvereinbarung(self):
         file_name = "terminvereinbarung.html"
         url = f"{self.mock_server_url}{file_name}"
-        result = check_for_appointment(url)
-        self.assertTrue(result)
+        appointment_available, available_dates = check_for_appointment(url)
+        self.assertTrue(appointment_available)
+        self.assertEqual(available_dates, ['12.06.2025'])
 
 
 if __name__ == "__main__":
