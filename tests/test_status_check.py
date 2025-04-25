@@ -3,7 +3,6 @@ import unittest
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 
-from lib.extract_dates import AvailableDate
 from lib.status_check import check_for_appointment
 
 
@@ -76,7 +75,7 @@ class TestStatusCheck(unittest.TestCase):
         url = f"{self.mock_server_url}{file_name}"
         appointment_available, available_dates = check_for_appointment(url)
         self.assertTrue(appointment_available)
-        self.assertEqual(available_dates, [AvailableDate('12.06.2025 - An diesem Tag einen Termin buchen', '/terminvereinbarung/termin/time/1749679200/')])
+        self.assertEqual(available_dates, ['12.06.2025'])
 
 
 if __name__ == "__main__":
