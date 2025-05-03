@@ -1,7 +1,9 @@
 import os
+import random
 import time
 from datetime import datetime
 
+from fake_useragent import UserAgent
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
@@ -15,17 +17,31 @@ def save_html(page_text):
 
 
 def get_html_page(url, delay=3):
+    user_agent = UserAgent()
+
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
 
+    options.add_argument(f"user-agent={user_agent}")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
+
     with webdriver.Chrome(options=options) as driver:
+        driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {"source": """
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+            });
+        """})
+        width = random.randint(800, 1920)
+        height = random.randint(600, 1080)
+        driver.set_window_size(width, height)
         driver.get(url)
         time.sleep(delay)
         page_text = driver.page_source
-
     return page_text
+
 
 def build_html_message(URL, available_dates):
     return ("<b>Go and book your appointment now!</b>\n"
