@@ -1,6 +1,7 @@
+from enum import Enum
+
 from lib.extract_dates import extract_available_dates
 from lib.utils import save_html, get_html_page
-from enum import Enum
 
 
 class CheckStatus(Enum):
@@ -13,19 +14,19 @@ class CheckStatus(Enum):
     UNKNOWN_PAGE = "Unknown Page"
 
 
-def check_for_appointment(url, timestamp, delay=0):
+def check_for_appointment(url, postfix="", delay=0):
     page_text = get_html_page(url, delay)
-    appointment_status = check_on_page(page_text, timestamp)
+    appointment_status = check_on_page(page_text, postfix)
     available_dates = []
     if appointment_status == CheckStatus.APPOINTMENTS_AVAILABLE:
         available_dates = extract_available_dates(page_text)
     return appointment_status, available_dates
 
 
-def check_on_page(page_text, timestamp):
+def check_on_page(page_text, postfix=""):
     if "Bitte wählen Sie ein Datum" in page_text:
         print("✅ Looks like appointments have appeared!")
-        save_html(page_text, timestamp)
+        save_html(page_text, f"success_{postfix}")
         return CheckStatus.APPOINTMENTS_AVAILABLE
     elif "Leider sind aktuell keine Termine für ihre Auswahl verfügbar." in page_text:
         print("❌ No appointments yet...")
@@ -44,6 +45,5 @@ def check_on_page(page_text, timestamp):
         return CheckStatus.TRY_AGAIN_LATER
     else:
         print("✅ Unknown page detected. Saving for analysis.")
-        save_html(page_text, timestamp)
+        save_html(page_text, f"unknown_{postfix}")
         return CheckStatus.UNKNOWN_PAGE
-
