@@ -8,8 +8,9 @@ from selenium.webdriver.chrome.options import Options
 
 
 def save_html(page_text, postfix):
-    os.makedirs("output/html", exist_ok=True)
     filename = f"output/html/index_{postfix}.html"
+    folder_path = os.path.dirname(filename)
+    os.makedirs(folder_path, exist_ok=True)
     with open(filename, "w", encoding="utf-8") as file:
         file.write(page_text)
 
