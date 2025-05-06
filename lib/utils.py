@@ -1,17 +1,15 @@
 import os
 import random
 import time
-from datetime import datetime
 
 from fake_useragent import UserAgent
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 
-def save_html(page_text):
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    os.makedirs("html", exist_ok=True)
-    filename = f"html/index_{timestamp}.html"
+def save_html(page_text, timestamp):
+    os.makedirs("output/html", exist_ok=True)
+    filename = f"output/html/index_{timestamp}.html"
     with open(filename, "w", encoding="utf-8") as file:
         file.write(page_text)
 
