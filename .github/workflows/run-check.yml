@@ -53,5 +53,6 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "Add new HTML snapshot of available appointments"
+            git pull --rebase
             git push
           fi

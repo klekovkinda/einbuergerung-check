@@ -33,7 +33,7 @@ export class LambdaCronStack extends cdk.Stack {
     githubTokenSecret.grantRead(lambdaFunction);
 
     new events.Rule(this, 'CronRule', {
-      schedule: events.Schedule.cron({ minute: '*', hour: '4-21' }),
+      schedule: events.Schedule.cron({ minute: '*/2', hour: '4-21' }),
       targets: [new targets.LambdaFunction(lambdaFunction)],
     });
   }
