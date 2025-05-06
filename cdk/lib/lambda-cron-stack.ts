@@ -10,7 +10,7 @@ export class LambdaCronStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const githubTokenSecret = secretsmanager.Secret.fromSecretNameV2(this, 'TerminRadarGitHubTokenSecret', 'GITHUB_TOKEN');
+    const githubTokenSecret = secretsmanager.Secret.fromSecretNameV2(this, 'TerminRadarGitHubTokenSecret', 'TerminRadar/GitHubTokenSecret');
 
     const lambdaFunction = new lambda.Function(this, 'CronLambda', {
       runtime: lambda.Runtime.PYTHON_3_9,
