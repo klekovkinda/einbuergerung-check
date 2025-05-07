@@ -3,8 +3,14 @@ name: Run Tests
 on:
   push:
     branches:
-      - main
-      - '**' # Runs on all branches
+      - '**'
+    paths:
+      - 'lib/**'
+      - '.github/workflows/test.yml'
+      - 'tests/**'
+      - 'einbuergerung_check.py'
+      - 'requirements.txt'
+      - 'requirements-dev.txt'
   pull_request:
 
 jobs:
