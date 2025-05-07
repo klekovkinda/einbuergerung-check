@@ -9,7 +9,6 @@ def handler(event, context):
     repo = "einbuergerung-check"
     workflow_id = "run-check.yml"
 
-    # Retrieve the parameter name from the environment variable
     parameter_name = os.getenv("GITHUB_TOKEN_PARAMETER_NAME")
     if not parameter_name:
         print("Environment variable GITHUB_TOKEN_PARAMETER_NAME is not set.")
@@ -18,7 +17,6 @@ def handler(event, context):
             "body": "Environment variable GITHUB_TOKEN_PARAMETER_NAME is not set."
         }
 
-    # Fetch the parameter value from AWS Systems Manager Parameter Store
     ssm_client = boto3.client("ssm")
     try:
         parameter = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
@@ -55,4 +53,3 @@ def handler(event, context):
             "statusCode": 500,
             "body": str(e)
         }
-handler(None, None)
