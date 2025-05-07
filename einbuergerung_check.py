@@ -23,6 +23,7 @@ if appointment_status == CheckStatus.APPOINTMENTS_AVAILABLE:
     bot.send_message(TELEGRAM_CHAT_ID, html_message, parse_mode="HTML")
     print(f"Telegram bot notification sent:\n{html_message}")
 
-csv_filename = f"output/statistics/stat_{date_time_now.strftime('%Y%m')}.csv"
+csv_filename = f"output/statistics/stat_{date_time_now.strftime('%Y%m%d')}.csv"
 execution_time = date_time_now.strftime('%Y-%m-%d %H:%M:%S')
 add_record(csv_filename, execution_time, appointment_status, available_dates)
+
