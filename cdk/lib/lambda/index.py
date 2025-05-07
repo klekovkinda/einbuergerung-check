@@ -9,14 +9,20 @@ def handler(event, context):
     repo = "einbuergerung-check"
     workflow_id = "run-check.yml"
 
-    # Retrieve the GitHub token from AWS Secrets Manager
-    secret_arn = os.getenv("GITHUB_TOKEN_SECRET_ARN")
-    secrets_client = boto3.client("secretsmanager")
+    parameter_name = os.getenv("GITHUB_TOKEN_PARAMETER_NAME")
+    if not parameter_name:
+        print("Environment variable GITHUB_TOKEN_PARAMETER_NAME is not set.")
+        return {
+            "statusCode": 500,
+            "body": "Environment variable GITHUB_TOKEN_PARAMETER_NAME is not set."
+        }
+
+    ssm_client = boto3.client("ssm")
     try:
-        secret_value = secrets_client.get_secret_value(SecretId=secret_arn)
-        github_token = secret_value["SecretString"]
+        parameter = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
+        github_token = parameter["Parameter"]["Value"]
     except Exception as e:
-        print("Error retrieving GitHub token from Secrets Manager:", e)
+        print("Error retrieving GitHub token from Parameter Store:", e)
         return {
             "statusCode": 500,
             "body": "Failed to retrieve GitHub token"
@@ -47,4 +53,3 @@ def handler(event, context):
             "statusCode": 500,
             "body": str(e)
         }
-handler(None, None)
