@@ -13,11 +13,11 @@ export class LambdaCronStack extends cdk.Stack {
     const parameterName = '/TerminRadar/GitHubToken';
 
     const lambdaFunction = new lambda.Function(this, 'CronLambda', {
-      runtime: lambda.Runtime.PYTHON_3_9,
+      runtime: lambda.Runtime.PYTHON_3_11,
       handler: 'index.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, 'lambda'), {
         bundling: {
-          image: lambda.Runtime.PYTHON_3_9.bundlingImage,
+          image: lambda.Runtime.PYTHON_3_11.bundlingImage,
           command: [
             'bash', '-c',
             'pip install -r requirements.txt -t /asset-output && cp -au . /asset-output'
