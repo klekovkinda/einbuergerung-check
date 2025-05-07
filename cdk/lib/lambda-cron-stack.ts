@@ -3,14 +3,13 @@ import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
-import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as path from 'path';
 
 export class LambdaCronStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const githubTokenSecret = secretsmanager.Secret.fromSecretNameV2(this, 'TerminRadarGitHubTokenSecret', 'TerminRadar/GitHubTokenSecret');
+    const parameterName = '/TerminRadar/GitHubToken';
 
     const lambdaFunction = new lambda.Function(this, 'CronLambda', {
       runtime: lambda.Runtime.PYTHON_3_9,
@@ -25,12 +24,9 @@ export class LambdaCronStack extends cdk.Stack {
         },
       }),
       environment: {
-        GITHUB_TOKEN_SECRET_ARN: githubTokenSecret.secretArn,
+        GITHUB_TOKEN_PARAMETER_NAME: parameterName,
       },
     });
-
-    // Grant the Lambda function permissions to read the secret
-    githubTokenSecret.grantRead(lambdaFunction);
 
     new events.Rule(this, 'CronRule', {
       schedule: events.Schedule.cron({ minute: '*/2', hour: '4-21' }),
