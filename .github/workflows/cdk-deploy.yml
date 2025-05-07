@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - 'cdk/**'
+      - '.github/workflows/cdk-deploy.yml'
 
 jobs:
   deploy:
@@ -21,8 +22,8 @@ jobs:
           node-version: '22.x'
 
       - name: Install dependencies
+        working-directory: cdk
         run: |
-          cd cdk
           npm install
 
       - name: Configure AWS credentials
@@ -33,7 +34,6 @@ jobs:
           aws-region: eu-central-1
 
       - name: Deploy CDK
+        working-directory: cdk
         run: |
-          cd cdk
-          npx cdk deploy --require-approval never
-
+          npm run cdk deploy --require-approval never
