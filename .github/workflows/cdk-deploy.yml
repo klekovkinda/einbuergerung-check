@@ -3,7 +3,7 @@ name: Deploy CDK Project
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - 'cdk/**'
 
