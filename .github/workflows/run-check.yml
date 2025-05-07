@@ -52,7 +52,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            git pull --rebase
             git commit -m "Add new HTML snapshot of available appointments"
             git push
           fi
