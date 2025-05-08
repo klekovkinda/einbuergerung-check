@@ -42,7 +42,6 @@ def get_html_page(url, delay=3):
     return page_text
 
 
-def build_html_message(URL, available_dates):
+def build_html_message(available_dates):
     return ("<b>Go and book your appointment now!</b>\n"
-            f"<a href='{URL}'>Click here to book the appointment</a>\n"
             "Available dates:\n") + "\n".join(f"• {available_date}" for available_date in available_dates)
