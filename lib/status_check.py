@@ -41,7 +41,7 @@ def check_on_page(page_text, postfix=""):
     elif "This site can’t be reached" in page_text:
         print("⚠️ The webpage might be temporarily down or it may have moved permanently to a new web address.")
         return CheckStatus.SITE_UNREACHABLE
-    elif "Die Terminvereinbarung ist zur Zeit nicht möglich." in page_text:
+    elif "Die Terminvereinbarung ist zur Zeit nicht" in page_text:
         print("⚠️ Maintenance for the base service Digital Application")
         return CheckStatus.MAINTENANCE
     elif "Bitte probieren Sie es zu einem späteren Zeitpunkt erneut." in page_text:

@@ -70,6 +70,13 @@ class TestStatusCheck(unittest.TestCase):
         self.assertEqual(appointment_available, CheckStatus.SITE_UNREACHABLE)
         self.assertEqual(available_dates, [])
 
+    def test_maintenance(self):
+        file_name = "maintenance.html"
+        url = f"{self.mock_server_url}{file_name}"
+        maintenance, available_dates = check_for_appointment(url)
+        self.assertEqual(maintenance, CheckStatus.MAINTENANCE)
+        self.assertEqual(available_dates, [])
+
     def test_check_for_appointment__terminvereinbarung(self):
         file_name = "terminvereinbarung.html"
         url = f"{self.mock_server_url}{file_name}"
