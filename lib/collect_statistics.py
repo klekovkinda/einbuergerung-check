@@ -24,7 +24,7 @@ def add_record(csv_filename, execution_time, appointment_status, available_dates
         for row in csv_rows:
             writer.writerow(row)
 
-def addMissingUSers(csv_filename, users):
+def add_missing_users(csv_filename, users):
     folder_path = os.path.dirname(csv_filename)
     os.makedirs(folder_path, exist_ok=True)
 

@@ -4,7 +4,7 @@ from datetime import datetime
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from lib.collect_statistics import add_record, addMissingUSers
+from lib.collect_statistics import add_record, add_missing_users
 from lib.get_channel_members import get_channel_members
 from lib.status_check import check_for_appointment, CheckStatus
 from lib.utils import build_html_message
@@ -32,4 +32,4 @@ csv_stat_filename = f"output/statistics/stat_{date_time_now.strftime('%Y%m%d')}.
 csv_user_filename = f"output/statistics/user_{date_time_now.strftime('%Y%m%d')}.csv"
 execution_time = date_time_now.strftime('%Y-%m-%d %H:%M:%S')
 add_record(csv_stat_filename, execution_time, appointment_status, available_dates)
-addMissingUSers(csv_user_filename, get_channel_members(TELEGRAM_CHAT_ID))
+add_missing_users(csv_user_filename, get_channel_members(TELEGRAM_CHAT_ID))
