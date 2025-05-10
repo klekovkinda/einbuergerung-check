@@ -35,7 +35,7 @@ export class LambdaCronStack extends cdk.Stack {
     }));
 
     new events.Rule(this, 'CronRule', {
-      schedule: events.Schedule.cron({ minute: '*/2', hour: '4-21' }),
+      schedule: events.Schedule.cron({ minute: '*/2', hour: '4-10' }),
       targets: [new targets.LambdaFunction(lambdaFunction)],
     });
   }
