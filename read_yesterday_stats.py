@@ -60,7 +60,7 @@ def read_yesterday_stats() -> tuple[str, str, int, int, int, int]:
             if row['status'] == CheckStatus.APPOINTMENTS_AVAILABLE.value:
                 successful_notifications.add(row['execution_time'])
                 available_dates.add(row['appointmentdate'])
-            elif row['status'] != CheckStatus.NO_APPOINTMENTS.value:
+            elif row['status'] != CheckStatus.NO_APPOINTMENTS.value and row['status'] != CheckStatus.MAINTENANCE.value:
                 failed_requests.add(row['execution_time'])
 
     if execution_times:
@@ -77,22 +77,25 @@ def read_yesterday_stats() -> tuple[str, str, int, int, int, int]:
 
 
 if __name__ == "__main__":
-    html_message = build_html_message(*read_yesterday_stats())
-    keyboard = InlineKeyboardMarkup()
-    keyboard.add(InlineKeyboardButton(text="Click here to support the project", url=SUPPORT_URL))
+    start_at, finish_at, execution_times, successful_notifications, available_dates, failed_requests = read_yesterday_stats()
 
-    try:
-        bot.unpin_all_chat_messages(TELEGRAM_CHAT_ID)
-        print("All messages unpinned successfully.")
-    except Exception as e:
-        print(f"Failed to unpin messages: {e}")
+    if successful_notifications > 0:
+        html_message = build_html_message(start_at, finish_at, execution_times, successful_notifications,
+                                          available_dates, failed_requests)
+        keyboard = InlineKeyboardMarkup()
+        keyboard.add(InlineKeyboardButton(text="Click here to support the project", url=SUPPORT_URL))
 
-    sent_message = bot.send_message(TELEGRAM_CHAT_ID, html_message, parse_mode="HTML", reply_markup=keyboard)
-    print(f"Telegram bot statistic sent with button:\n{html_message}")
+        try:
+            bot.unpin_all_chat_messages(TELEGRAM_CHAT_ID)
+            print("All messages unpinned successfully.")
+        except Exception as e:
+            print(f"Failed to unpin messages: {e}")
 
-    try:
-        bot.pin_chat_message(TELEGRAM_CHAT_ID, sent_message.message_id)
-        print("Message pinned successfully.")
-    except Exception as e:
-        print(f"Failed to pin the message: {e}")
+        sent_message = bot.send_message(TELEGRAM_CHAT_ID, html_message, parse_mode="HTML", reply_markup=keyboard)
+        print(f"Telegram bot statistic sent with button:\n{html_message}")
 
+        try:
+            bot.pin_chat_message(TELEGRAM_CHAT_ID, sent_message.message_id)
+            print("Message pinned successfully.")
+        except Exception as e:
+            print(f"Failed to pin the message: {e}")
