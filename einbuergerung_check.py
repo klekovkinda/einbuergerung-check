@@ -32,4 +32,4 @@ csv_stat_filename = f"output/statistics/stat_{date_time_now.strftime('%Y%m%d')}.
 csv_user_filename = f"output/statistics/user_{date_time_now.strftime('%Y%m%d')}.csv"
 execution_time = date_time_now.strftime('%Y-%m-%d %H:%M:%S')
 add_record(csv_stat_filename, execution_time, appointment_status, available_dates)
-#add_missing_users(csv_user_filename, get_channel_members(TELEGRAM_CHAT_ID))
+add_missing_users(csv_user_filename, get_channel_members(TELEGRAM_CHAT_ID))

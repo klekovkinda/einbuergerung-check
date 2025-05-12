@@ -32,12 +32,18 @@ def add_missing_users(csv_filename, users):
 
     if os.path.isfile(csv_filename):
         with open(csv_filename, mode="r", newline="") as csv_file:
-            reader = csv.reader(csv_file)
-            existing_users = {row[0] for row in reader}
+            reader = csv.DictReader(csv_file)
+            existing_users = {row["user"] for row in reader}
 
     new_users = [user for user in users if user not in existing_users]
 
+    file_exists = os.path.isfile(csv_filename)
     with open(csv_filename, mode="a", newline="") as csv_file:
         writer = csv.writer(csv_file)
-        for user in new_users:
-            writer.writerow([user])
+        if not file_exists:
+            writer.writerow(["user", "status"])  # Write header
+            for user in new_users:
+                writer.writerow([user, "old"])
+        else:
+            for user in new_users:
+                writer.writerow([user, "new"])
