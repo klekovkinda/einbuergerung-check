@@ -4,8 +4,8 @@ from datetime import datetime
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+from lib.channel_operator import get_channel_members, delete_unpinned_messages
 from lib.collect_statistics import add_record, add_missing_users
-from lib.get_channel_members import get_channel_members
 from lib.status_check import check_for_appointment, CheckStatus
 from lib.utils import build_html_message
 
@@ -27,6 +27,8 @@ if appointment_status == CheckStatus.APPOINTMENTS_AVAILABLE:
 
     bot.send_message(TELEGRAM_CHAT_ID, html_message, parse_mode="HTML", reply_markup=keyboard)
     print(f"Telegram bot notification sent with button:\n{html_message}")
+elif appointment_status == CheckStatus.NO_APPOINTMENTS:
+    delete_unpinned_messages(TELEGRAM_CHAT_ID)
 
 csv_stat_filename = f"output/statistics/stat_{date_time_now.strftime('%Y%m%d')}.csv"
 csv_user_filename = f"output/statistics/user_{date_time_now.strftime('%Y%m%d')}.csv"
