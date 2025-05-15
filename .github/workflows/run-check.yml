@@ -59,7 +59,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            git pull --rebase --strategy-option=theirs origin
+          git pull --rebase --strategy-option=theirs origin ${{ github.ref }}
             git commit -m "Add new HTML snapshot of available appointments"
             git push
           fi
