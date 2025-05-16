@@ -1,5 +1,11 @@
 import csv
 import os
+from enum import Enum
+
+
+class UserStatus(Enum):
+    NEW = "new"
+    OLD = "old"
 
 
 def add_record(csv_filename, execution_time, appointment_status, available_dates):
@@ -43,7 +49,7 @@ def add_missing_users(csv_filename, users):
         if not file_exists:
             writer.writerow(["user", "status"])  # Write header
             for user in new_users:
-                writer.writerow([user, "old"])
+                writer.writerow([user, UserStatus.OLD.value])
         else:
             for user in new_users:
-                writer.writerow([user, "new"])
+                writer.writerow([user, UserStatus.NEW.value])

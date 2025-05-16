@@ -6,7 +6,9 @@ import pytz
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+from lib.collect_statistics import UserStatus
 from lib.status_check import CheckStatus
+from lib.utils import build_statistics_html_message
 
 SUPPORT_URL = "https://buymeacoffee.com/termin_radar"
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -15,19 +17,38 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 
 
-def build_html_message(start_at: str = "00:00:00", finish_at: str = "00:00:00", execution_times: int = 0,
-                       successful_notifications: int = 0, available_dates: int = 0, failed_requests: int = 0):
-    return (f"""
-    Hey friends!
-    I'm <strong>Termin Radar 😎</strong> While you were waiting yesterday, I wasn’t just twiddling my thumbs — I was scanning like crazy for available Einbürgerungstest appointments!
-    Between <strong>{start_at}</strong> and <strong>{finish_at}</strong>, I checked <strong>{execution_times}</strong> times.
-    I managed to find open slots and sent you <strong>{successful_notifications}</strong> notifications for <strong>{available_dates}</strong> different dates!
-    There were <strong>{failed_requests}</strong> times when I couldn’t load the info — sorry about that! But no worries, the team is working hard to improve the service every day.
-    Like what I'm doing? You can support the project and help me keep scanning for you! 🙌
-    """)
+def get_channel_members_for_date(date_ymd_str) -> tuple[set, set]:
+    old_users = set()
+    new_users = set()
+
+    file_name = f"user_{date_ymd_str}.csv"
+    file_path = os.path.join("output", "statistics", file_name)
+
+    if not os.path.exists(file_path):
+        print(f"File not found: {file_path}")
+        return old_users, new_users
+
+    with open(file_path, mode='r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['status'] == UserStatus.NEW.value:
+                new_users.add(row['user'])
+            else:
+                old_users.add(row['user'])
+    return old_users, new_users
 
 
-def read_yesterday_stats() -> tuple[str, str, int, int, int, int]:
+def read_yesterday_user_stats() -> tuple[int, int]:
+    today = datetime.now().strftime('%Y%m%d')
+    old_users_today, new_users_today = get_channel_members_for_date(today)
+    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')
+    old_users_yesterday, new_users_yesterday = get_channel_members_for_date(yesterday)
+    total_users_yesterday = new_users_yesterday | old_users_yesterday
+    missing_users_from_yesterday = total_users_yesterday - old_users_today
+    return len(new_users_yesterday), len(missing_users_from_yesterday)
+
+
+def read_yesterday_execution_stats() -> tuple[str, str, int, int, int, int]:
     start_at = "00:00:00"
     finish_at = "00:00:00"
     execution_times_count = 0
@@ -77,11 +98,12 @@ def read_yesterday_stats() -> tuple[str, str, int, int, int, int]:
 
 
 if __name__ == "__main__":
-    start_at, finish_at, execution_times, successful_notifications, available_dates, failed_requests = read_yesterday_stats()
+    new_users, missing_users = read_yesterday_user_stats()
+    start_at, finish_at, execution_times, successful_notifications, available_dates, failed_requests = read_yesterday_execution_stats()
 
-    if successful_notifications > 0:
-        html_message = build_html_message(start_at, finish_at, execution_times, successful_notifications,
-                                          available_dates, failed_requests)
+    if execution_times > 0:
+        html_message = build_statistics_html_message(start_at, finish_at, execution_times, successful_notifications,
+                                                     available_dates, failed_requests, new_users, missing_users)
         keyboard = InlineKeyboardMarkup()
         keyboard.add(InlineKeyboardButton(text="Click here to support the project", url=SUPPORT_URL))
 
