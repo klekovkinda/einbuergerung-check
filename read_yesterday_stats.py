@@ -11,6 +11,7 @@ from lib.status_check import CheckStatus
 from lib.utils import build_statistics_html_message
 
 SUPPORT_URL = "https://buymeacoffee.com/termin_radar"
+PAYPAL_SUPPORT_URL = "https://www.paypal.com/pool/9f1bWcE4aK?sr=wccr"
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
@@ -105,7 +106,8 @@ if __name__ == "__main__":
         html_message = build_statistics_html_message(start_at, finish_at, execution_times, successful_notifications,
                                                      available_dates, failed_requests, new_users, missing_users)
         keyboard = InlineKeyboardMarkup()
-        keyboard.add(InlineKeyboardButton(text="Click here to support the project", url=SUPPORT_URL))
+        keyboard.add(InlineKeyboardButton(text="Support the project via credit card", url=SUPPORT_URL))
+        keyboard.add(InlineKeyboardButton(text="Support the project via PayPal", url=PAYPAL_SUPPORT_URL))
 
         try:
             bot.unpin_all_chat_messages(TELEGRAM_CHAT_ID)
