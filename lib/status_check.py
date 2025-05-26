@@ -27,7 +27,6 @@ def check_for_appointment(url, postfix="", delay=0):
 def check_on_page(page_text, postfix=""):
     if "Bitte wählen Sie ein Datum" in page_text:
         print("✅ Looks like appointments have appeared!")
-        save_html(page_text, f"success_{postfix}")
         return CheckStatus.APPOINTMENTS_AVAILABLE
     elif "Leider sind aktuell keine Termine für ihre Auswahl verfügbar." in page_text:
         print("❌ No appointments yet...")
