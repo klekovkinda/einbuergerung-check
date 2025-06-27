@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { LambdaCronStack } from '../lib/lambda-cron-stack';
+import { LambdaCronStack } from '../lib/gh-trigger/lambda-cron-stack';
 
 const app = new cdk.App();
 
