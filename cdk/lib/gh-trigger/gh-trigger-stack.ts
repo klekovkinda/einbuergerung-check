@@ -6,7 +6,7 @@ import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as path from 'path';
 import * as iam from 'aws-cdk-lib/aws-iam';
 
-export class LambdaCronStack extends cdk.Stack {
+export class GhTriggerStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
