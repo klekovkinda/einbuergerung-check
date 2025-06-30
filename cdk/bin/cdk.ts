@@ -11,4 +11,3 @@ new GhTriggerStack(app, 'GhTriggerStack', {
   },
 });
 
-cdk.Tags.of(app).add('cdk:bootstrap', 's3://termin-radar-cdk-bucket');
