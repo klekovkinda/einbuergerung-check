@@ -20,7 +20,7 @@ def add_dynamodb_record(table, execution_date_time, appointment_status, availabl
                 'execution_date': execution_date_time.strftime('%Y-%m-%d'),
                 'execution_time': execution_date_time.strftime('%Y-%m-%d %H:%M:%S'),
                 'status': appointment_status.value,
-                'appointmentdate': available_date
+                'appointment_date': available_date
             }
             table.put_item(Item=item)
         if not available_dates:
@@ -28,7 +28,7 @@ def add_dynamodb_record(table, execution_date_time, appointment_status, availabl
                 'execution_date': execution_date_time.strftime('%Y-%m-%d'),
                 'execution_time': execution_date_time.strftime('%Y-%m-%d %H:%M:%S'),
                 'status': appointment_status.value,
-                'appointmentdate': "N/A"
+                'appointment_date': "N/A"
             }
             table.put_item(Item=item)
     except ClientError as e:
