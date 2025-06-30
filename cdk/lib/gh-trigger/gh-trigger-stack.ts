@@ -12,7 +12,7 @@ export class GhTriggerStack extends cdk.Stack {
 
     const parameterName = '/TerminRadar/GitHubToken';
 
-    const runAppointmentCheckGHWorkflowFunction = new lambda.Function(this, 'CronLambda', {
+    const runAppointmentCheckGHWorkflowFunction = new lambda.Function(this, `${id}Lambda`, {
       functionName: 'RunAppointmentCheckGHWorkflowFunction',
       description:"Lambda function to trigger the GitHub workflow for checking available appointments",
       runtime: lambda.Runtime.PYTHON_3_11,
@@ -36,7 +36,7 @@ export class GhTriggerStack extends cdk.Stack {
       resources: [`arn:aws:ssm:${this.region}:${this.account}:parameter${parameterName}`],
     }));
 
-    new events.Rule(this, 'CronRule', {
+    new events.Rule(this, `${id}Rule`, {
       ruleName: `Trigger${runAppointmentCheckGHWorkflowFunction.functionName}Rule`,
       schedule: events.Schedule.cron({ minute: '*/2', hour: '4-20' }),
       targets: [new targets.LambdaFunction(runAppointmentCheckGHWorkflowFunction)],
