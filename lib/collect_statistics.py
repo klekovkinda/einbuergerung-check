@@ -4,14 +4,14 @@ import boto3
 from enum import Enum
 from botocore.exceptions import ClientError
 
+dynamodb = boto3.resource('dynamodb')
 
 class UserStatus(Enum):
     NEW = "new"
     OLD = "old"
 
 
-def add_dynamodb_record(table, execution_date_time, appointment_status, available_dates):
-    dynamodb = boto3.resource('dynamodb')
+def add_ddb_termin_records(table, execution_date_time, appointment_status, available_dates):
     table = dynamodb.Table(table)
 
     try:
@@ -55,6 +55,10 @@ def add_record(csv_filename, execution_time, appointment_status, available_dates
             writer.writerow(csv_header)
         for row in csv_rows:
             writer.writerow(row)
+
+def add_ddb_user_records(table, check_date_time, users):
+    table = dynamodb.Table(table)
+
 
 def add_missing_users(csv_filename, users):
     folder_path = os.path.dirname(csv_filename)

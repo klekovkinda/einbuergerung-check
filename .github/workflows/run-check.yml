@@ -56,6 +56,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          ENCRYPTION_SALT: ${{ secrets.ENCRYPTION_SALT }}
         run: python einbuergerung_check.py
 
       - name: Commit and push HTML changes

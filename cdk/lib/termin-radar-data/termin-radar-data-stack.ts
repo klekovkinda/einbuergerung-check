@@ -25,6 +25,20 @@ export class TerminRadarDataStack extends cdk.Stack {
             removalPolicy: cdk.RemovalPolicy.DESTROY
         });
 
+        const userStatisticDynamoTable = new cdk.aws_dynamodb.Table(this, `${id}UserStatisticDynamoTable`, {
+            tableName: "user_statistic",
+            partitionKey: {
+                name: "date",
+                type: cdk.aws_dynamodb.AttributeType.STRING
+            },
+            sortKey: {
+                name: "user",
+                type: cdk.aws_dynamodb.AttributeType.STRING
+            },
+            billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+            removalPolicy: cdk.RemovalPolicy.DESTROY
+        });
+
         const oidcProvider = new iam.OpenIdConnectProvider(this, `${id}GitHubOIDCProvider`, {
             url: "https://token.actions.githubusercontent.com",
             clientIds: ["sts.amazonaws.com"],
@@ -38,6 +52,8 @@ export class TerminRadarDataStack extends cdk.Stack {
                 }
             }),
         });
+
         terminStatisticDynamoTable.grantReadWriteData(gitHubActionTerminRadarDataRole);
+        userStatisticDynamoTable.grantReadWriteData(gitHubActionTerminRadarDataRole);
     }
 }

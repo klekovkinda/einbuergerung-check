@@ -4,7 +4,7 @@ from datetime import datetime
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from lib.collect_statistics import add_record, add_missing_users, add_dynamodb_record
+from lib.collect_statistics import add_record, add_missing_users, add_ddb_termin_records, add_ddb_user_records
 from lib.get_channel_members import get_channel_members
 from lib.status_check import check_for_appointment, CheckStatus
 from lib.utils import build_html_message
@@ -16,8 +16,8 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 
 print("Checking...")
-execution_date_time = datetime.now()
-timestamp = execution_date_time.strftime("%Y%m%d_%H%M%S")
+now_date_time = datetime.now()
+timestamp = now_date_time.strftime("%Y%m%d_%H%M%S")
 appointment_status, available_dates = check_for_appointment(SERVICE_URL, timestamp, delay=3)
 
 if appointment_status == CheckStatus.APPOINTMENTS_AVAILABLE:
@@ -28,9 +28,12 @@ if appointment_status == CheckStatus.APPOINTMENTS_AVAILABLE:
     bot.send_message(TELEGRAM_CHAT_ID, html_message, parse_mode="HTML", reply_markup=keyboard)
     print(f"Telegram bot notification sent with button:\n{html_message}")
 
-csv_stat_filename = f"output/statistics/stat_{execution_date_time.strftime('%Y%m%d')}.csv"
-csv_user_filename = f"output/statistics/user_{execution_date_time.strftime('%Y%m%d')}.csv"
-execution_time = execution_date_time.strftime('%Y-%m-%d %H:%M:%S')
+csv_stat_filename = f"output/statistics/stat_{now_date_time.strftime('%Y%m%d')}.csv"
+csv_user_filename = f"output/statistics/user_{now_date_time.strftime('%Y%m%d')}.csv"
+execution_time = now_date_time.strftime('%Y-%m-%d %H:%M:%S')
 add_record(csv_stat_filename, execution_time, appointment_status, available_dates)
-add_dynamodb_record("termin_statistic", execution_date_time, appointment_status, available_dates)
-add_missing_users(csv_user_filename, get_channel_members(TELEGRAM_CHAT_ID))
+channel_members_hashes, channel_members_encrypted = get_channel_members(TELEGRAM_CHAT_ID)
+add_missing_users(csv_user_filename, channel_members_hashes)
+
+add_ddb_termin_records("termin_statistic", now_date_time, appointment_status, available_dates)
+add_ddb_user_records("user_statistic", now_date_time, channel_members_encrypted)
