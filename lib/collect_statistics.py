@@ -1,12 +1,38 @@
 import csv
 import os
+import boto3
 from enum import Enum
+from botocore.exceptions import ClientError
 
 
 class UserStatus(Enum):
     NEW = "new"
     OLD = "old"
 
+
+def add_dynamodb_record(table, execution_date_time, appointment_status, available_dates):
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(table)
+
+    try:
+        for available_date in available_dates:
+            item = {
+                'execution_date': execution_date_time.strftime('%Y-%m-%d'),
+                'execution_time': execution_date_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'status': appointment_status.value,
+                'appointmentdate': available_date
+            }
+            table.put_item(Item=item)
+        if not available_dates:
+            item = {
+                'execution_date': execution_date_time.strftime('%Y-%m-%d'),
+                'execution_time': execution_date_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'status': appointment_status.value,
+                'appointmentdate': "N/A"
+            }
+            table.put_item(Item=item)
+    except ClientError as e:
+        print(f"Error adding record to DynamoDB: {e.response['Error']['Message']}")
 
 def add_record(csv_filename, execution_time, appointment_status, available_dates):
     folder_path = os.path.dirname(csv_filename)
