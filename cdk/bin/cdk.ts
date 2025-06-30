@@ -1,13 +1,24 @@
 #!/usr/bin/env node
-import * as cdk from 'aws-cdk-lib';
-import { GhTriggerStack } from '../lib/gh-trigger/gh-trigger-stack';
+import {App} from 'aws-cdk-lib';
+import {GhTriggerStack} from '../lib/gh-trigger/gh-trigger-stack';
+import {TerminRadarDataStack} from '../lib/termin-radar-data/termin-radar-data-stack';
 
-const app = new cdk.App();
+const app = new App();
 
 new GhTriggerStack(app, 'GhTriggerStack', {
-  env: {
-    account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: process.env.CDK_DEFAULT_REGION,
-  },
+    env: {
+        account: process.env.CDK_DEFAULT_ACCOUNT,
+        region: process.env.CDK_DEFAULT_REGION,
+    },
+});
+
+new TerminRadarDataStack(app, 'TerminRadarDataStack', {
+    //TODO: Replace with dynamic values
+    repoName: "klekovkinda",
+    repoOwner: "einbuergerung-check",
+    env: {
+        account: process.env.CDK_DEFAULT_ACCOUNT,
+        region: process.env.CDK_DEFAULT_REGION,
+    }
 });
 
