@@ -3,8 +3,7 @@ name: Run Einbürgerung Check
 on:
   workflow_dispatch:
 
-permissions:
-  # update to read when statistic fully migrated to the DynamoDB
+permissions: # update contents to read when statistic fully migrated to the DynamoDB
   contents: write
   id-token: write
 
@@ -45,7 +44,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          
+
       - name: Restore telegram session
         run: |
           echo "${{ secrets.TERMIN_RADAR_TELEGRAM_SESSION }}" | base64 -d > termin_radar.session
