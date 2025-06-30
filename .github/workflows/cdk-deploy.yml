@@ -36,4 +36,4 @@ jobs:
       - name: Deploy CDK
         working-directory: cdk
         run: |
-          npm run cdk -- deploy --require-approval never
+          npm run cdk -- deploy --all --require-approval never
