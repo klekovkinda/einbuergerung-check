@@ -14,8 +14,8 @@ new GhTriggerStack(app, 'GhTriggerStack', {
 
 new TerminRadarDataStack(app, 'TerminRadarDataStack', {
     //TODO: Replace with dynamic values
-    repoName: "klekovkinda",
-    repoOwner: "einbuergerung-check",
+    repoOwner: "klekovkinda",
+    repoName: "einbuergerung-check",
     env: {
         account: process.env.CDK_DEFAULT_ACCOUNT,
         region: process.env.CDK_DEFAULT_REGION,
