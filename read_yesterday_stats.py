@@ -2,6 +2,7 @@ import csv
 import os
 from datetime import datetime, timedelta, timezone
 
+import boto3
 import pytz
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -16,7 +17,7 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
-
+dynamodb = boto3.resource("dynamodb")
 
 def get_channel_members_for_date(date_ymd_str) -> tuple[set, set]:
     old_users = set()
@@ -38,15 +39,21 @@ def get_channel_members_for_date(date_ymd_str) -> tuple[set, set]:
                 old_users.add(row['user'])
     return old_users, new_users
 
+def get_users_for_date(date)-> set[str]:
+    table = dynamodb.Table("user_statistic")
+    date_ymd_str = date.strftime("%Y-%m-%d")
+    response = table.query(KeyConditionExpression=boto3.dynamodb.conditions.Key("date").eq(date_ymd_str))
+    return set([item.get('user') for item in response.get('Items', [])])
+
 
 def read_yesterday_user_stats() -> tuple[int, int]:
-    today = datetime.now().strftime('%Y%m%d')
-    old_users_today, new_users_today = get_channel_members_for_date(today)
-    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')
-    old_users_yesterday, new_users_yesterday = get_channel_members_for_date(yesterday)
-    total_users_yesterday = new_users_yesterday | old_users_yesterday
-    missing_users_from_yesterday = total_users_yesterday - old_users_today
-    return len(new_users_yesterday), len(missing_users_from_yesterday)
+    today = datetime.now()
+    today_users = get_users_for_date(today)
+    yesterday_users = get_users_for_date(today - timedelta(days=1))
+    day_before_yesterday_users = get_users_for_date(today - timedelta(days=2))
+    yesterday_missing_users = yesterday_users - today_users
+    yesterday_new_users = yesterday_users - day_before_yesterday_users
+    return len(yesterday_new_users), len(yesterday_missing_users)
 
 
 def read_yesterday_execution_stats() -> tuple[str, str, int, int, int, int]:
