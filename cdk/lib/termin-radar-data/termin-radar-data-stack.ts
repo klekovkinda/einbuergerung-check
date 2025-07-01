@@ -18,7 +18,7 @@ export class TerminRadarDataStack extends cdk.Stack {
                 type: cdk.aws_dynamodb.AttributeType.STRING
             },
             sortKey: {
-                name: "uuid",
+                name: "hash",
                 type: cdk.aws_dynamodb.AttributeType.STRING
             },
             billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
