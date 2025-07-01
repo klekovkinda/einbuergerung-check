@@ -25,9 +25,9 @@ def add_ddb_termin_records(table, execution_date_time, appointment_status, avail
                     'appointment_date': available_date}
             table.put_item(Item=item)
         if not available_dates:
-            item = {'uuid': str(uuid4()),
-                    'execution_date': execution_date_time.strftime('%Y-%m-%d'),
+            item = {'execution_date': execution_date_time.strftime('%Y-%m-%d'),
                     'execution_time': execution_date_time.strftime('%Y-%m-%d %H:%M:%S'),
+                    "execution_time_appointment_date": f"{execution_date_time.strftime('%Y-%m-%d %H:%M:%S')} | N/A",
                     'status': appointment_status.value,
                     'appointment_date': "N/A"}
             table.put_item(Item=item)
