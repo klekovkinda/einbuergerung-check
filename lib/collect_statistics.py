@@ -1,10 +1,13 @@
 import csv
 import os
-import boto3
 from enum import Enum
+from uuid import uuid4
+
+import boto3
 from botocore.exceptions import ClientError
 
 dynamodb = boto3.resource('dynamodb')
+
 
 class UserStatus(Enum):
     NEW = "new"
@@ -13,22 +16,24 @@ class UserStatus(Enum):
 
 def add_ddb_termin_records(table, execution_date_time, appointment_status, available_dates):
     table = dynamodb.Table(table)
-
     try:
         for available_date in available_dates:
-            item = {'execution_date': execution_date_time.strftime('%Y-%m-%d'),
+            item = {'uuid': str(uuid4()),
+                    'execution_date': execution_date_time.strftime('%Y-%m-%d'),
                     'execution_time': execution_date_time.strftime('%Y-%m-%d %H:%M:%S'),
                     'status': appointment_status.value,
                     'appointment_date': available_date}
             table.put_item(Item=item)
         if not available_dates:
-            item = {'execution_date': execution_date_time.strftime('%Y-%m-%d'),
+            item = {'uuid': str(uuid4()),
+                    'execution_date': execution_date_time.strftime('%Y-%m-%d'),
                     'execution_time': execution_date_time.strftime('%Y-%m-%d %H:%M:%S'),
                     'status': appointment_status.value,
                     'appointment_date': "N/A"}
             table.put_item(Item=item)
     except ClientError as e:
         print(f"Error adding record to DynamoDB: {e.response['Error']['Message']}")
+
 
 def add_record(csv_filename, execution_time, appointment_status, available_dates):
     folder_path = os.path.dirname(csv_filename)
@@ -52,6 +57,7 @@ def add_record(csv_filename, execution_time, appointment_status, available_dates
         for row in csv_rows:
             writer.writerow(row)
 
+
 def add_ddb_user_records(table, check_date_time, users):
     table = dynamodb.Table(table)
     today = check_date_time.strftime('%Y-%m-%d')
@@ -59,6 +65,7 @@ def add_ddb_user_records(table, check_date_time, users):
         for user in users:
             item = {'date': today, 'user': user}
             batch.put_item(Item=item)
+
 
 def add_missing_users(csv_filename, users):
     folder_path = os.path.dirname(csv_filename)
