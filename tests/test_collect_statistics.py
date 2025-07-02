@@ -1,28 +1,43 @@
 import unittest
 from datetime import datetime
-from unittest.mock import patch, MagicMock
+
+import boto3
+from moto import mock_aws
 
 from lib.collect_statistics import add_ddb_termin_records, add_ddb_user_records
 from lib.status_check import CheckStatus
 
 
+@mock_aws
 class TestCollectStatistics(unittest.TestCase):
-    @patch("boto3.resource")
-    @patch("lib.collect_statistics.dynamodb")
-    def test_add_ddb_termin_records_with_dates(self, mock_dynamodb, mock_boto3):
-        mock_table = MagicMock()
-        mock_batch_writer = MagicMock()
-        mock_table.batch_writer.return_value.__enter__.return_value = mock_batch_writer
-        mock_dynamodb.Table.return_value = mock_table
 
+    def setUp(self):
+        dynamodb = boto3.resource("dynamodb")
+        dynamodb.create_table(TableName='termin_statistic',
+                              BillingMode='PAY_PER_REQUEST',
+                              KeySchema=[{'AttributeName': 'execution_date', 'KeyType': 'HASH'},
+                                         {'AttributeName': 'execution_time_appointment_date', 'KeyType': 'RANGE'}],
+                              AttributeDefinitions=[{'AttributeName': 'execution_date', 'AttributeType': 'S'},
+                                                    {
+                                                            'AttributeName': 'execution_time_appointment_date',
+                                                            'AttributeType': 'S'}])
+        dynamodb.create_table(TableName='user_statistic',
+                              BillingMode='PAY_PER_REQUEST',
+                              KeySchema=[{'AttributeName': 'date', 'KeyType': 'HASH'},
+                                         {'AttributeName': 'user', 'KeyType': 'RANGE'}],
+                              AttributeDefinitions=[{'AttributeName': 'date', 'AttributeType': 'S'},
+                                                    {'AttributeName': 'user', 'AttributeType': 'S'}])
+
+    def test_add_ddb_termin_records_with_dates(self):
         execution_date_time = datetime(2024, 6, 1, 12, 0, 0)
         status = CheckStatus.APPOINTMENTS_AVAILABLE
         available_dates = ["2024-06-10", "2024-06-11"]
 
         add_ddb_termin_records(execution_date_time, status, available_dates)
 
-        self.assertEqual(mock_batch_writer.put_item.call_count, 2)
-        items = [call[1]["Item"] for call in mock_batch_writer.put_item.call_args_list]
+        items = boto3.resource("dynamodb").Table('termin_statistic').scan()['Items']
+        self.assertEqual(len(items), 2)
+
         self.assertIn({
                 'appointment_date': '2024-06-10',
                 'execution_date': '2024-06-01',
@@ -36,21 +51,14 @@ class TestCollectStatistics(unittest.TestCase):
                 'execution_time_appointment_date': '2024-06-01 12:00:00 | 2024-06-11',
                 'status': 'Appointments Available'}, items)
 
-    @patch("boto3.resource")
-    @patch("lib.collect_statistics.dynamodb")
-    def test_add_ddb_termin_records_no_dates(self, mock_dynamodb, mock_boto3):
-        mock_table = MagicMock()
-        mock_batch_writer = MagicMock()
-        mock_table.batch_writer.return_value.__enter__.return_value = mock_batch_writer
-        mock_dynamodb.Table.return_value = mock_table
-
+    def test_add_ddb_termin_records_no_dates(self):
         execution_date_time = datetime(2024, 6, 1, 12, 0, 0)
         status = CheckStatus.NO_APPOINTMENTS
 
         add_ddb_termin_records(execution_date_time, status, [])
 
-        mock_batch_writer.put_item.assert_called_once()
-        items = [call[1]["Item"] for call in mock_batch_writer.put_item.call_args_list]
+        items = boto3.resource("dynamodb").Table('termin_statistic').scan()['Items']
+        self.assertEqual(len(items), 1)
         self.assertIn({
                 'appointment_date': 'N/A',
                 'execution_date': '2024-06-01',
@@ -58,20 +66,13 @@ class TestCollectStatistics(unittest.TestCase):
                 'execution_time_appointment_date': '2024-06-01 12:00:00 | N/A',
                 'status': 'No Appointments'}, items)
 
-    @patch("boto3.resource")
-    @patch("lib.collect_statistics.dynamodb")
-    def test_add_ddb_user_records(self, mock_dynamodb, mock_boto3):
-        mock_table = MagicMock()
-        mock_batch_writer = MagicMock()
-        mock_table.batch_writer.return_value.__enter__.return_value = mock_batch_writer
-        mock_dynamodb.Table.return_value = mock_table
+    def test_add_ddb_user_records(self):
         dt = datetime(2024, 6, 1, 12, 0, 0)
         users = ["alice", "bob"]
 
         add_ddb_user_records(dt, users)
 
-        self.assertEqual(mock_batch_writer.put_item.call_count, 2)
-        items = [call[1]["Item"] for call in mock_batch_writer.put_item.call_args_list]
+        items = boto3.resource("dynamodb").Table('user_statistic').scan()['Items']
         self.assertIn({"date": "2024-06-01", "user": "alice"}, items)
         self.assertIn({"date": "2024-06-01", "user": "bob"}, items)
 
