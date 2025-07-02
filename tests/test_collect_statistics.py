@@ -1,59 +1,80 @@
-import csv
-import os
 import unittest
+from datetime import datetime
 
-from lib.collect_statistics import add_record
+import boto3
+from moto import mock_aws
+
+from lib.collect_statistics import add_ddb_termin_records, add_ddb_user_records
 from lib.status_check import CheckStatus
 
 
-class TestAddRecord(unittest.TestCase):
+@mock_aws
+class TestCollectStatistics(unittest.TestCase):
+
     def setUp(self):
-        self.test_csv = "test_output/test_file.csv"
-        self.available_dates = ["2023-10-10", "2023-10-15"]
+        dynamodb = boto3.resource("dynamodb")
+        dynamodb.create_table(TableName='termin_statistic',
+                              BillingMode='PAY_PER_REQUEST',
+                              KeySchema=[{'AttributeName': 'execution_date', 'KeyType': 'HASH'},
+                                         {'AttributeName': 'execution_time_appointment_date', 'KeyType': 'RANGE'}],
+                              AttributeDefinitions=[{'AttributeName': 'execution_date', 'AttributeType': 'S'},
+                                                    {
+                                                            'AttributeName': 'execution_time_appointment_date',
+                                                            'AttributeType': 'S'}])
+        dynamodb.create_table(TableName='user_statistic',
+                              BillingMode='PAY_PER_REQUEST',
+                              KeySchema=[{'AttributeName': 'date', 'KeyType': 'HASH'},
+                                         {'AttributeName': 'user', 'KeyType': 'RANGE'}],
+                              AttributeDefinitions=[{'AttributeName': 'date', 'AttributeType': 'S'},
+                                                    {'AttributeName': 'user', 'AttributeType': 'S'}])
 
-    def tearDown(self):
-        if os.path.exists(self.test_csv):
-            os.remove(self.test_csv)
-        if os.path.exists(os.path.dirname(self.test_csv)):
-            os.rmdir(os.path.dirname(self.test_csv))
+    def test_add_ddb_termin_records_with_dates(self):
+        execution_date_time = datetime(2024, 6, 1, 12, 0, 0)
+        status = CheckStatus.APPOINTMENTS_AVAILABLE
+        available_dates = ["2024-06-10", "2024-06-11"]
 
-    def test_add_record_with_dates(self):
-        execution_time = "2023-10-01 12:00:00"
-        add_record(self.test_csv, execution_time, CheckStatus.APPOINTMENTS_AVAILABLE, self.available_dates)
+        add_ddb_termin_records(execution_date_time, status, available_dates)
 
-        with open(self.test_csv, mode="r") as csv_file:
-            reader = csv.reader(csv_file)
-            rows = list(reader)
+        items = boto3.resource("dynamodb").Table('termin_statistic').scan()['Items']
+        self.assertEqual(len(items), 2)
 
-        self.assertEqual(rows[0], ["execution_time", "status", "appointmentdate"])
-        self.assertEqual(rows[1], [execution_time, CheckStatus.APPOINTMENTS_AVAILABLE.value, "2023-10-10"])
-        self.assertEqual(rows[2], [execution_time, CheckStatus.APPOINTMENTS_AVAILABLE.value, "2023-10-15"])
+        self.assertIn({
+                'appointment_date': '2024-06-10',
+                'execution_date': '2024-06-01',
+                'execution_time': '2024-06-01 12:00:00',
+                'execution_time_appointment_date': '2024-06-01 12:00:00 | 2024-06-10',
+                'status': 'Appointments Available'}, items)
+        self.assertIn({
+                'appointment_date': '2024-06-11',
+                'execution_date': '2024-06-01',
+                'execution_time': '2024-06-01 12:00:00',
+                'execution_time_appointment_date': '2024-06-01 12:00:00 | 2024-06-11',
+                'status': 'Appointments Available'}, items)
 
-    def test_add_record_without_dates(self):
-        execution_time = "2023-10-01 12:00:01"
-        add_record(self.test_csv, execution_time, CheckStatus.NO_APPOINTMENTS, [])
+    def test_add_ddb_termin_records_no_dates(self):
+        execution_date_time = datetime(2024, 6, 1, 12, 0, 0)
+        status = CheckStatus.NO_APPOINTMENTS
 
-        with open(self.test_csv, mode="r") as csv_file:
-            reader = csv.reader(csv_file)
-            rows = list(reader)
+        add_ddb_termin_records(execution_date_time, status, [])
 
-        self.assertEqual(rows[0], ["execution_time", "status", "appointmentdate"])
-        self.assertEqual(rows[1], [execution_time, CheckStatus.NO_APPOINTMENTS.value, "N/A"])
+        items = boto3.resource("dynamodb").Table('termin_statistic').scan()['Items']
+        self.assertEqual(len(items), 1)
+        self.assertIn({
+                'appointment_date': 'N/A',
+                'execution_date': '2024-06-01',
+                'execution_time': '2024-06-01 12:00:00',
+                'execution_time_appointment_date': '2024-06-01 12:00:00 | N/A',
+                'status': 'No Appointments'}, items)
 
+    def test_add_ddb_user_records(self):
+        dt = datetime(2024, 6, 1, 12, 0, 0)
+        users = ["alice", "bob"]
 
-    def test_add_many_records(self):
-        execution_time_0 = "2023-10-01 12:00:00"
-        execution_time_1 = "2023-10-01 12:00:01"
-        add_record(self.test_csv, execution_time_0, CheckStatus.NO_APPOINTMENTS, [])
-        add_record(self.test_csv, execution_time_1, CheckStatus.NO_APPOINTMENTS, [])
+        add_ddb_user_records(dt, users)
 
-        with open(self.test_csv, mode="r") as csv_file:
-            reader = csv.reader(csv_file)
-            rows = list(reader)
-
-        self.assertEqual(rows[0], ["execution_time", "status", "appointmentdate"])
-        self.assertEqual(rows[1], [execution_time_0, CheckStatus.NO_APPOINTMENTS.value, "N/A"])
-        self.assertEqual(rows[2], [execution_time_1, CheckStatus.NO_APPOINTMENTS.value, "N/A"])
+        items = boto3.resource("dynamodb").Table('user_statistic').scan()['Items']
+        self.assertIn({"date": "2024-06-01", "user": "alice"}, items)
+        self.assertIn({"date": "2024-06-01", "user": "bob"}, items)
 
 
 if __name__ == "__main__":
