@@ -1,4 +1,3 @@
-import csv
 import os
 from datetime import datetime, timedelta, timezone
 
@@ -7,7 +6,6 @@ import pytz
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from lib.collect_statistics import UserStatus
 from lib.status_check import CheckStatus
 from lib.utils import build_statistics_html_message
 
@@ -19,27 +17,8 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 dynamodb = boto3.resource("dynamodb")
 
-def get_channel_members_for_date(date_ymd_str) -> tuple[set, set]:
-    old_users = set()
-    new_users = set()
 
-    file_name = f"user_{date_ymd_str}.csv"
-    file_path = os.path.join("output", "statistics", file_name)
-
-    if not os.path.exists(file_path):
-        print(f"File not found: {file_path}")
-        return old_users, new_users
-
-    with open(file_path, mode='r', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['status'] == UserStatus.NEW.value:
-                new_users.add(row['user'])
-            else:
-                old_users.add(row['user'])
-    return old_users, new_users
-
-def get_users_for_date(date)-> set[str]:
+def get_users_for_date(date) -> set[str]:
     table = dynamodb.Table("user_statistic")
     date_ymd_str = date.strftime("%Y-%m-%d")
     response = table.query(KeyConditionExpression=boto3.dynamodb.conditions.Key("date").eq(date_ymd_str))
@@ -57,52 +36,34 @@ def read_yesterday_user_stats() -> tuple[int, int]:
 
 
 def read_yesterday_execution_stats() -> tuple[str, str, int, int, int, int]:
-    start_at = "00:00:00"
-    finish_at = "00:00:00"
-    execution_times_count = 0
-    successful_notifications_count = 0
-    available_dates_count = 0
-    failed_requests_count = 0
+    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')
-    file_name = f"stat_{yesterday}.csv"
-    file_path = os.path.join("output", "statistics", file_name)
+    start_at = f"{yesterday} 00:00:00"
+    finish_at = f"{yesterday} 00:00:00"
 
-    if not os.path.exists(file_path):
-        print(f"File not found: {file_path}")
-        return start_at, finish_at, execution_times_count, successful_notifications_count, available_dates_count, failed_requests_count
+    table = dynamodb.Table("termin_statistic")
+    response = table.query(KeyConditionExpression=boto3.dynamodb.conditions.Key("execution_date").eq(yesterday))
+    items = response.get("Items", [])
 
-    berlin_tz = pytz.timezone('Europe/Berlin')
-    utc_tz = timezone.utc
+    start_at = min(item["execution_time"] for item in items if "execution_time" in item) if items else start_at
+    finish_at = max(item["execution_time"] for item in items if "execution_time" in item) if items else finish_at
 
-    execution_times = set()
-    successful_notifications = set()
-    available_dates = set()
-    failed_requests = set()
+    execution_times_count = len(set(item["execution_time"] for item in items if "execution_time" in item))
+    successful_notifications_count = len(
+        set(item["execution_time"] for item in items if item.get("status") == CheckStatus.APPOINTMENTS_AVAILABLE.value))
+    available_dates_count = len(set(item["appointment_date"] for item in items if
+                                    item.get("appointment_date") and item.get(
+                                        "status") == CheckStatus.APPOINTMENTS_AVAILABLE.value))
+    failed_requests_count = len(set(item["execution_time"] for item in items if
+                                    item.get("status") not in [CheckStatus.APPOINTMENTS_AVAILABLE.value,
+                                                               CheckStatus.NO_APPOINTMENTS.value,
+                                                               CheckStatus.MAINTENANCE.value]))
+    start_at_utc_time = datetime.strptime(start_at, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
+    finish_at_utc_time = datetime.strptime(finish_at, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
 
-    with open(file_path, mode='r', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            utc_time = datetime.strptime(row['execution_time'], '%Y-%m-%d %H:%M:%S').replace(tzinfo=utc_tz)
-            berlin_time = utc_time.astimezone(berlin_tz)
-            execution_times.add(berlin_time)
-            if row['status'] == CheckStatus.APPOINTMENTS_AVAILABLE.value:
-                successful_notifications.add(row['execution_time'])
-                available_dates.add(row['appointmentdate'])
-            elif row['status'] != CheckStatus.NO_APPOINTMENTS.value and row['status'] != CheckStatus.MAINTENANCE.value:
-                failed_requests.add(row['execution_time'])
-
-    if execution_times:
-        start_at = min(execution_times).strftime('%H:%M:%S')
-        finish_at = max(execution_times).strftime('%H:%M:%S')
-        execution_times_count = len(execution_times)
-        successful_notifications_count = len(successful_notifications)
-        available_dates_count = len(available_dates)
-        failed_requests_count = len(failed_requests)
-    else:
-        print("No data found in the file.")
-
-    return start_at, finish_at, execution_times_count, successful_notifications_count, available_dates_count, failed_requests_count
+    return (start_at_utc_time.astimezone(pytz.timezone('Europe/Berlin')).strftime('%H:%M:%S'),
+            finish_at_utc_time.astimezone(pytz.timezone('Europe/Berlin')).strftime('%H:%M:%S'), execution_times_count,
+            successful_notifications_count, available_dates_count, failed_requests_count)
 
 
 if __name__ == "__main__":
