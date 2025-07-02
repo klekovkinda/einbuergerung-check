@@ -1,2 +1,2 @@
 -r requirements.txt
-moto[all]==5.1.6
+moto==5.1.6
