@@ -49,21 +49,27 @@ def read_yesterday_execution_stats() -> tuple[str, str, int, int, int, int]:
     finish_at = max(item["execution_time"] for item in items if "execution_time" in item) if items else finish_at
 
     execution_times_count = len(set(item["execution_time"] for item in items if "execution_time" in item))
-    successful_notifications_count = len(
-        set(item["execution_time"] for item in items if item.get("status") == CheckStatus.APPOINTMENTS_AVAILABLE.value))
+
+    successful_notifications_count = len(set(
+            item["execution_time"] for item in items if item.get("status") == CheckStatus.APPOINTMENTS_AVAILABLE.value))
+
     available_dates_count = len(set(item["appointment_date"] for item in items if
-                                    item.get("appointment_date") and item.get(
-                                        "status") == CheckStatus.APPOINTMENTS_AVAILABLE.value))
+                                    item.get("appointment_date") and item.get("status") == CheckStatus.APPOINTMENTS_AVAILABLE.value))
+
     failed_requests_count = len(set(item["execution_time"] for item in items if
                                     item.get("status") not in [CheckStatus.APPOINTMENTS_AVAILABLE.value,
                                                                CheckStatus.NO_APPOINTMENTS.value,
                                                                CheckStatus.MAINTENANCE.value]))
+
     start_at_utc_time = datetime.strptime(start_at, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
     finish_at_utc_time = datetime.strptime(finish_at, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
 
     return (start_at_utc_time.astimezone(pytz.timezone('Europe/Berlin')).strftime('%H:%M:%S'),
-            finish_at_utc_time.astimezone(pytz.timezone('Europe/Berlin')).strftime('%H:%M:%S'), execution_times_count,
-            successful_notifications_count, available_dates_count, failed_requests_count)
+            finish_at_utc_time.astimezone(pytz.timezone('Europe/Berlin')).strftime('%H:%M:%S'),
+            execution_times_count,
+            successful_notifications_count,
+            available_dates_count,
+            failed_requests_count)
 
 
 if __name__ == "__main__":
@@ -71,8 +77,14 @@ if __name__ == "__main__":
     start_at, finish_at, execution_times, successful_notifications, available_dates, failed_requests = read_yesterday_execution_stats()
 
     if execution_times > 0:
-        html_message = build_statistics_html_message(start_at, finish_at, execution_times, successful_notifications,
-                                                     available_dates, failed_requests, new_users, missing_users)
+        html_message = build_statistics_html_message(start_at,
+                                                     finish_at,
+                                                     execution_times,
+                                                     successful_notifications,
+                                                     available_dates,
+                                                     failed_requests,
+                                                     new_users,
+                                                     missing_users)
         keyboard = InlineKeyboardMarkup()
         keyboard.add(InlineKeyboardButton(text="Support the project via credit card", url=SUPPORT_URL))
         keyboard.add(InlineKeyboardButton(text="Support the project via PayPal", url=PAYPAL_SUPPORT_URL))

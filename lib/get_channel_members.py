@@ -1,5 +1,5 @@
-import os
 import hashlib
+import os
 
 from telethon.sync import TelegramClient
 from telethon.tl.functions.channels import GetParticipantsRequest
@@ -10,19 +10,22 @@ TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 ENCRYPTION_SALT = os.getenv("ENCRYPTION_SALT")
 
+
 def get_channel_members(channel_id):
-    with TelegramClient('termin_radar', TELEGRAM_API_ID, TELEGRAM_API_HASH).start(
-            bot_token=TELEGRAM_BOT_TOKEN) as client:
+    with TelegramClient('termin_radar',
+                        TELEGRAM_API_ID,
+                        TELEGRAM_API_HASH).start(bot_token=TELEGRAM_BOT_TOKEN) as client:
         participants = []
         offset = 0
         limit = 100
         while True:
-            users = client(
-                GetParticipantsRequest(channel=channel_id, filter=ChannelParticipantsSearch(''), offset=offset,
-                    limit=limit, hash=0)).users
+            users = client(GetParticipantsRequest(channel=channel_id,
+                                                  filter=ChannelParticipantsSearch(''),
+                                                  offset=offset,
+                                                  limit=limit,
+                                                  hash=0)).users
             if not users:
                 break
             participants.extend(users)
             offset += len(users)
-        return [hashlib.md5(str(user.id).encode()).hexdigest() for user in participants], [
-            hashlib.md5(f"{ENCRYPTION_SALT}-{participant.id}".encode()).hexdigest() for participant in participants]
+        return [hashlib.md5(f"{ENCRYPTION_SALT}-{participant.id}".encode()).hexdigest() for participant in participants]
