@@ -32,5 +32,7 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Run tests
+        env:
+          AWS_DEFAULT_REGION: eu-central-1
         run: |
           python -m unittest discover -s tests
