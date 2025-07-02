@@ -7,8 +7,9 @@ from lib.status_check import CheckStatus
 
 
 class TestCollectStatistics(unittest.TestCase):
+    @patch("boto3.resource")
     @patch("lib.collect_statistics.dynamodb")
-    def test_add_ddb_termin_records_with_dates(self, mock_dynamodb):
+    def test_add_ddb_termin_records_with_dates(self, mock_dynamodb, mock_boto3):
         mock_table = MagicMock()
         mock_batch_writer = MagicMock()
         mock_table.batch_writer.return_value.__enter__.return_value = mock_batch_writer
@@ -35,8 +36,9 @@ class TestCollectStatistics(unittest.TestCase):
                 'execution_time_appointment_date': '2024-06-01 12:00:00 | 2024-06-11',
                 'status': 'Appointments Available'}, items)
 
+    @patch("boto3.resource")
     @patch("lib.collect_statistics.dynamodb")
-    def test_add_ddb_termin_records_no_dates(self, mock_dynamodb):
+    def test_add_ddb_termin_records_no_dates(self, mock_dynamodb, mock_boto3):
         mock_table = MagicMock()
         mock_batch_writer = MagicMock()
         mock_table.batch_writer.return_value.__enter__.return_value = mock_batch_writer
@@ -56,8 +58,9 @@ class TestCollectStatistics(unittest.TestCase):
                 'execution_time_appointment_date': '2024-06-01 12:00:00 | N/A',
                 'status': 'No Appointments'}, items)
 
+    @patch("boto3.resource")
     @patch("lib.collect_statistics.dynamodb")
-    def test_add_ddb_user_records(self, mock_dynamodb):
+    def test_add_ddb_user_records(self, mock_dynamodb, mock_boto3):
         mock_table = MagicMock()
         mock_batch_writer = MagicMock()
         mock_table.batch_writer.return_value.__enter__.return_value = mock_batch_writer
