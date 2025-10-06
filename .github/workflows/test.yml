@@ -1,9 +1,7 @@
 name: Run Tests
 
 on:
-  push:
-    branches:
-      - '**'
+  pull_request:
     paths:
       - 'lib/**'
       - '.github/workflows/test.yml'
@@ -11,7 +9,6 @@ on:
       - 'einbuergerung_check.py'
       - 'requirements.txt'
       - 'requirements-dev.txt'
-  pull_request:
 
 jobs:
   test:
