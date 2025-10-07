@@ -15,11 +15,11 @@ export class GhTriggerStack extends cdk.Stack {
         const runAppointmentCheckGHWorkflowFunction = new lambda.Function(this, `${id}Lambda`, {
             functionName: 'RunAppointmentCheckGHWorkflowFunction',
             description: "Lambda function to trigger the GitHub workflow for checking available appointments",
-            runtime: lambda.Runtime.PYTHON_3_11,
+            runtime: lambda.Runtime.PYTHON_3_13,
             handler: 'index.handler',
             code: lambda.Code.fromAsset(path.join(__dirname, 'lambda'), {
                 bundling: {
-                    image: lambda.Runtime.PYTHON_3_11.bundlingImage,
+                    image: lambda.Runtime.PYTHON_3_13.bundlingImage,
                     command: ['bash',
                               '-c',
                               'pip install -r requirements.txt -t /asset-output && cp -au . /asset-output'],
