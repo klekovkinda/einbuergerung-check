@@ -9,9 +9,9 @@ from selenium.webdriver.chrome.options import Options
 
 
 PROMOTION_MESSAGE = (
-        f"Found a slot? Now prepare for the test!\n"
-        f"Try this free, ad-free app for iPhone & Mac: https://apps.apple.com/app/id6745673617\n"
-        "It includes in-line translations, explanations for the questions, and lets you take or review practice tests.\n")
+        f"Found a slot? Now prepare for the test! "
+        f"Try <a href='https://apps.apple.com/app/apple-store/id6745673617?pt=126241179&ct=termin-radar&mt=8'>Leben In Deutschland Prep 2025</a> free, ad-free app for iPhone & Mac. "
+        "It includes in-line translations, explanations for the questions, and lets you take or review practice tests.")
 
 def save_html(page_text, postfix):
     filename = f"output/html/index_{postfix}.html"
