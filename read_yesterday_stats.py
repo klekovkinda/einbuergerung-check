@@ -1,13 +1,13 @@
 import os
 from datetime import datetime, timedelta, timezone
 
-import boto3
+import boto3.dynamodb.conditions
 import pytz
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from lib.status_check import CheckStatus
-from lib.utils import build_statistics_html_message
+from lib.utils import build_statistics_html_message, get_dynamodb_table
 
 SUPPORT_URL = "https://buymeacoffee.com/termin_radar"
 PAYPAL_SUPPORT_URL = "https://www.paypal.com/pool/9f1bWcE4aK?sr=wccr"
@@ -15,11 +15,9 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
-dynamodb = boto3.resource("dynamodb")
-
 
 def get_users_for_date(date) -> set[str]:
-    table = dynamodb.Table("user_statistic")
+    table = get_dynamodb_table("user_statistic")
     date_ymd_str = date.strftime("%Y-%m-%d")
     response = table.query(KeyConditionExpression=boto3.dynamodb.conditions.Key("date").eq(date_ymd_str))
     return set([item.get('user') for item in response.get('Items', [])])
@@ -41,7 +39,7 @@ def read_yesterday_execution_stats() -> tuple[str, str, int, int, int, int]:
     start_at = f"{yesterday} 00:00:00"
     finish_at = f"{yesterday} 00:00:00"
 
-    table = dynamodb.Table("termin_statistic")
+    table = get_dynamodb_table("termin_statistic")
     response = table.query(KeyConditionExpression=boto3.dynamodb.conditions.Key("execution_date").eq(yesterday))
     items = response.get("Items", [])
 

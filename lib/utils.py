@@ -2,6 +2,7 @@ import os
 import random
 import time
 
+import boto3
 from fake_useragent import UserAgent
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -41,6 +42,9 @@ def get_html_page(url, delay=3):
         page_text = driver.page_source
     return page_text
 
+def get_dynamodb_table(name: str):
+    dynamodb = boto3.resource("dynamodb")
+    return dynamodb.Table(name)
 
 def build_html_message(available_dates):
     return ("<b>Go and book your appointment now!</b>\n"
