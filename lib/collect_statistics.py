@@ -1,10 +1,8 @@
-import boto3
-
-dynamodb = boto3.resource('dynamodb')
+from lib.utils import get_dynamodb_table
 
 
 def add_ddb_termin_records(execution_date_time, appointment_status, available_dates):
-    table = dynamodb.Table("termin_statistic")
+    table = get_dynamodb_table("termin_statistic")
     if not available_dates:
         available_dates = ["N/A"]
     with table.batch_writer() as batch:
@@ -19,7 +17,7 @@ def add_ddb_termin_records(execution_date_time, appointment_status, available_da
 
 
 def add_ddb_user_records(check_date_time, users):
-    table = dynamodb.Table("user_statistic")
+    table = get_dynamodb_table("user_statistic")
     today = check_date_time.strftime('%Y-%m-%d')
     with table.batch_writer() as batch:
         for user in users:
