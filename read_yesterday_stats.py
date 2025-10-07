@@ -93,7 +93,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Failed to unpin messages: {e}")
 
-        sent_message = bot.send_message(TELEGRAM_CHAT_ID, html_message, parse_mode="HTML", reply_markup=keyboard)
+        sent_message = bot.send_message(TELEGRAM_CHAT_ID, html_message, parse_mode="HTML", reply_markup=keyboard, disable_web_page_preview=True)
         print(f"Telegram bot statistic sent with button:\n{html_message}")
 
         try:

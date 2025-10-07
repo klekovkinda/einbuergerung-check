@@ -8,6 +8,11 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 
+PROMOTION_MESSAGE = (
+        f"Found a slot? Now prepare for the test!\n"
+        f"Try this free, ad-free app for iPhone & Mac: https://apps.apple.com/app/id6745673617\n"
+        "It includes in-line translations, explanations for the questions, and lets you take or review practice tests.\n")
+
 def save_html(page_text, postfix):
     filename = f"output/html/index_{postfix}.html"
     folder_path = os.path.dirname(filename)
@@ -125,5 +130,6 @@ def build_statistics_html_message(start_at: str = "00:00:00", finish_at: str = "
         "I'm <strong>Termin Radar 😎</strong> While you were waiting yesterday, I wasn’t just twiddling my thumbs — I was scanning like crazy for available Einbürgerungstest appointments!\n"
         f"{execution_times_msg} {successful_notifications_msg}\n"
         f"{failed_requests_msg}{new_users_msg}\n"
-        f"{missing_users_msg}Like what I'm doing? You can support the project and help me keep scanning for you! 🙌\n"
+        f"{missing_users_msg}{PROMOTION_MESSAGE}\n"
+        f"Like what I'm doing? You can support the project and help me keep scanning for you! 🙌\n"
     )
