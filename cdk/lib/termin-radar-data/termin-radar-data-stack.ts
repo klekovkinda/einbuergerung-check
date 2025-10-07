@@ -47,8 +47,11 @@ export class TerminRadarDataStack extends cdk.Stack {
         const gitHubActionTerminRadarDataRole = new iam.Role(this, `${id}GitHubActionTerminRadarDataRole`, {
             roleName: "gitHubActionTerminRadarDataRole",
             assumedBy: new iam.WebIdentityPrincipal(oidcProvider.openIdConnectProviderArn, {
+                "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                },
                 "StringLike": {
-                    "token.actions.githubusercontent.com:sub": `repo:${props.repoOwner}/${props.repoName}:*`
+                    "token.actions.githubusercontent.com:sub": "repo:klekovkinda/einbuergerung-check:ref:refs/heads/master"
                 }
             }),
         });
