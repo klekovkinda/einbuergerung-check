@@ -70,8 +70,10 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
         }));
 
         new events.Rule(this, `${id}Rule`, {
-            ruleName: `Trigger${terminRadarStatisticsFunction.functionName}Rule`, schedule: events.Schedule.cron({
-                minute: '0', hour: '10'
+            ruleName: `Trigger${terminRadarStatisticsFunction.functionName}Rule`,
+            schedule: events.Schedule.cron({
+                minute: '0',
+                hour: '10'
             }), targets: [new targets.LambdaFunction(terminRadarStatisticsFunction)],
         });
 
