@@ -21,6 +21,7 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
             functionName: 'TerminRadarStatisticsFunction',
             description: "Lambda function that extracts statistics from the termin-radar repository and sends them to a Telegram channel",
             runtime: lambda.Runtime.PYTHON_3_13,
+            timeout: cdk.Duration.seconds(30),
             handler: 'index.handler',
             code: lambda.Code.fromAsset(path.join(__dirname, 'lambda'), {
                 bundling: {
@@ -46,10 +47,12 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
                 `arn:aws:ssm:${this.region}:${this.account}:parameter${telegramBotTokenParameterName}`]
         }));
 
-        //Add policy to access DynamoDB table termin_statistic
+        //Add policy to access DynamoDB tables [termin_statistic, user_statistic]
         terminRadarStatisticsFunction.addToRolePolicy(new iam.PolicyStatement({
-            actions: ['dynamodb:Query', 'dynamodb:Scan', 'dynamodb:GetItem'],
-            resources: [`arn:aws:dynamodb:${this.region}:${this.account}:table/termin_statistic`]
+            actions: ['dynamodb:Query'],
+            resources: [
+                `arn:aws:dynamodb:${this.region}:${this.account}:table/termin_statistic`,
+                `arn:aws:dynamodb:${this.region}:${this.account}:table/user_statistic`]
         }));
 
         new events.Rule(this, `${id}Rule`, {
