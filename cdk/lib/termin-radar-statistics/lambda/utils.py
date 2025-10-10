@@ -65,16 +65,3 @@ def build_statistics_html_message(start_at: str = "00:00:00", finish_at: str = "
             messages=conversation,
             inferenceConfig={"maxTokens": 512, "temperature": 0.7, "topP": 0.9}, )
     return response["output"]["message"]["content"][0]["text"]
-
-if __name__ == '__main__':
-    print(build_statistics_html_message(
-        start_at="06:00:59",
-        finish_at="22:58:57",
-        execution_times=510,
-        successful_notifications=56,
-        available_dates=7,
-        failed_requests=7,
-        new_users=4,
-        missing_users=3,
-        promotion_message="Here would be a promotion message if there was one."
-    ))
