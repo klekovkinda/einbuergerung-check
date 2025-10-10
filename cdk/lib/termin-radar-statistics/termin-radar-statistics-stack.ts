@@ -74,7 +74,8 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
             schedule: events.Schedule.cron({
                 minute: '0',
                 hour: '10'
-            }), targets: [new targets.LambdaFunction(terminRadarStatisticsFunction)],
+            }),
+            targets: [new targets.LambdaFunction(terminRadarStatisticsFunction)],
         });
 
     }
