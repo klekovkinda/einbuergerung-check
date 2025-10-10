@@ -1,12 +1,22 @@
 import os
 import random
 import time
+from enum import Enum
 
 import boto3
 from fake_useragent import UserAgent
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+class CheckStatus(Enum):
+    APPOINTMENTS_AVAILABLE = "Appointments Available"
+    NO_APPOINTMENTS = "No Appointments"
+    ACCESS_DENIED = "Access Denied"
+    TOO_MANY_REQUESTS = "Too Many Requests"
+    SITE_UNREACHABLE = "Site Unreachable"
+    MAINTENANCE = "Maintenance"
+    TRY_AGAIN_LATER = "Try Again Later"
+    UNKNOWN_PAGE = "Unknown Page"
 
 PROMOTION_MESSAGE = (
         f"Found a slot? Now prepare for the test! "

@@ -1,18 +1,5 @@
-from enum import Enum
-
 from lib.extract_dates import extract_available_dates
-from lib.utils import save_html, get_html_page
-
-
-class CheckStatus(Enum):
-    APPOINTMENTS_AVAILABLE = "Appointments Available"
-    NO_APPOINTMENTS = "No Appointments"
-    ACCESS_DENIED = "Access Denied"
-    TOO_MANY_REQUESTS = "Too Many Requests"
-    SITE_UNREACHABLE = "Site Unreachable"
-    MAINTENANCE = "Maintenance"
-    TRY_AGAIN_LATER = "Try Again Later"
-    UNKNOWN_PAGE = "Unknown Page"
+from lib.utils import save_html, get_html_page, CheckStatus
 
 
 def check_for_appointment(url, postfix="", delay=0):
