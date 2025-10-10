@@ -17,6 +17,10 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
         const telegramChatIdParameterName = '/TerminRadar/TelegramChatId';
         const telegramBotTokenParameterName = '/TerminRadar/TelegramBotToken';
 
+        const regionPrefix = "eu";
+        const bedRockModelId = 'amazon.nova-micro-v1:0';
+        const inferenceProfileId = `${regionPrefix}.${bedRockModelId}`;
+
         const terminRadarStatisticsFunction = new lambda.Function(this, `${id}Lambda`, {
             functionName: 'TerminRadarStatisticsFunction',
             description: "Lambda function that extracts statistics from the termin-radar repository and sends them to a Telegram channel",
@@ -30,6 +34,7 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
                 },
             }),
             environment: {
+                INFERENCE_PROFILE_ID: inferenceProfileId,
                 SUPPORT_URL: "https://buymeacoffee.com/termin_radar",
                 PAYPAL_SUPPORT_URL: "https://www.paypal.com/pool/9f1bWcE4aK?sr=wccr",
                 PROMOTION_MESSAGE_PARAMETER_NAME: promotionMessageParameterName,
@@ -55,13 +60,19 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
                 `arn:aws:dynamodb:${this.region}:${this.account}:table/user_statistic`]
         }));
 
+        //Add policy to access Bedrock model
+        terminRadarStatisticsFunction.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['bedrock:InvokeModel'],
+            resources: [
+                `arn:aws:bedrock:${this.region}:${this.account}:inference-profile/${inferenceProfileId}`,
+                `arn:aws:bedrock:${regionPrefix}-*::foundation-model/${bedRockModelId}`
+            ]
+        }));
+
         new events.Rule(this, `${id}Rule`, {
-            ruleName: `Trigger${terminRadarStatisticsFunction.functionName}Rule`,
-            schedule: events.Schedule.cron({
-                minute: '0',
-                hour: '12'
-            }),
-            targets: [new targets.LambdaFunction(terminRadarStatisticsFunction)],
+            ruleName: `Trigger${terminRadarStatisticsFunction.functionName}Rule`, schedule: events.Schedule.cron({
+                minute: '0', hour: '10'
+            }), targets: [new targets.LambdaFunction(terminRadarStatisticsFunction)],
         });
 
     }
