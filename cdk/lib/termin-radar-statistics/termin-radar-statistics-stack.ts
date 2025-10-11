@@ -5,6 +5,7 @@ import path from "path";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
+import {addDefaultTags} from "../utils";
 
 export interface TerminRadarStatisticsStackProperties extends cdk.StackProps {
 }
@@ -77,6 +78,6 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
             }),
             targets: [new targets.LambdaFunction(terminRadarStatisticsFunction)],
         });
-
+        addDefaultTags(this);
     }
 }

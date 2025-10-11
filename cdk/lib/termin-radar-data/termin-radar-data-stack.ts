@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import {Construct} from "constructs";
+import {addDefaultTags} from "../utils";
 
 export interface TerminRadarDataStackProperties extends cdk.StackProps {
     repoOwner: string;
@@ -58,5 +59,6 @@ export class TerminRadarDataStack extends cdk.Stack {
 
         terminStatisticDynamoTable.grantReadWriteData(gitHubActionTerminRadarDataRole);
         userStatisticDynamoTable.grantReadWriteData(gitHubActionTerminRadarDataRole);
+        addDefaultTags(this);
     }
 }
