@@ -5,6 +5,7 @@ import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as path from 'path';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import {addDefaultTags} from "../utils";
 
 export class GhTriggerStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -43,5 +44,6 @@ export class GhTriggerStack extends cdk.Stack {
             }),
             targets: [new targets.LambdaFunction(runAppointmentCheckGHWorkflowFunction)],
         });
+        addDefaultTags(this);
     }
 }
