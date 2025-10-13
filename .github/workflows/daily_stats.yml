@@ -1,9 +1,9 @@
 name: Daily Stats
 
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "0 10 * * *"
+#on:
+#  workflow_dispatch:
+#  schedule:
+#    - cron: "0 10 * * *"
 
 permissions: 
   id-token: write
