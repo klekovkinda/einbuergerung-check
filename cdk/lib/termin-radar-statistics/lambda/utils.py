@@ -36,17 +36,18 @@ You receive the following data from yesterday:
 
 Your task is to generate a single-block message in a friendly, casual, and emotional tone that:
 
+* Use ONLY HTML formatting supported by Telegram. Do not use Markdown, inline code, or any other formatting style.
 * Don’t forget to say who you are — Termin Radar
 * Includes emojis to make it expressive and fun — use as many as feel natural, no limits
 * Expresses gratitude, celebrates wins, and empathizes with issues
-* Embeds the promotion message exactly as provided: {promotion_message}
+* Embeds the promotion message exactly as provided no formatting is needed here: {promotion_message}
 * Mentions support for the project
 * Make all the facts bold via <strong></strong> HTML tags
 * Avoids line breaks — use punctuation and emojis to separate ideas
 * Does not mention "0" directly — instead, use friendly, human-readable phrasing
 * Varies the wording and structure every time, even if the data is the same
 * Keeps the message short and engaging, like a social media post
-* You can add the hashtags #TerminRadar, #EinbürgerungstestTerminRadar and #Einbürgerungstest at the end
+* You can add the hashtags #EinbürgerungstestTerminRadar, #Einbürgerungstest and #TerminRadar at the end
 
 Emotional guidance for each stat:
 
@@ -69,3 +70,15 @@ Emotional guidance for each stat:
             messages=conversation,
             inferenceConfig={"maxTokens": 512, "temperature": 0.7, "topP": 0.9}, )
     return response["output"]["message"]["content"][0]["text"]
+
+if __name__ == '__main__':
+    message = build_statistics_html_message(start_at="06:00:59",
+                                           finish_at="22:58:57",
+                                           execution_times=510,
+                                           successful_notifications=56,
+                                           available_dates=7,
+                                           failed_requests=7,
+                                           new_users=4,
+                                           missing_users=3,
+                                           promotion_message="PROMOTION MESSAGE HERE")
+    print(message)
