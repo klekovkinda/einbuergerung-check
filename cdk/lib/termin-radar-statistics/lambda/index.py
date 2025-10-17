@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import boto3.dynamodb.conditions
-import pytz
+from dateutil import tz
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -54,8 +54,8 @@ def read_yesterday_execution_stats() -> tuple[str, str, int, int, int, int]:
     start_at_utc_time = datetime.strptime(start_at, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
     finish_at_utc_time = datetime.strptime(finish_at, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
 
-    return (start_at_utc_time.astimezone(pytz.timezone('Europe/Berlin')).strftime('%H:%M:%S'),
-            finish_at_utc_time.astimezone(pytz.timezone('Europe/Berlin')).strftime('%H:%M:%S'),
+    return (start_at_utc_time.astimezone(tz.gettz('Europe/Berlin')).strftime('%H:%M:%S'),
+            finish_at_utc_time.astimezone(tz.gettz('Europe/Berlin')).strftime('%H:%M:%S'),
             execution_times_count,
             successful_notifications_count,
             available_dates_count,
