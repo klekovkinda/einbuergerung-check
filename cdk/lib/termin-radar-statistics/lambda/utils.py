@@ -47,6 +47,7 @@ Your task is to generate a single-block message in a friendly, casual, and emoti
 * Does not mention "0" directly — instead, use friendly, human-readable phrasing
 * Varies the wording and structure every time, even if the data is the same
 * Keeps the message short and engaging, like a social media post
+* do not use asterisks for emphasis
 * You can add the hashtags #EinbürgerungstestTerminRadar, #Einbürgerungstest and #TerminRadar at the end
 
 Emotional guidance for each stat:
