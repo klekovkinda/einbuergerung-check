@@ -5,7 +5,8 @@ import path from "path";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
-import {addDefaultTags} from "../utils";
+import {addDefaultTags, getPowertoolsLayer} from "../utils";
+import {Architecture} from "aws-cdk-lib/aws-lambda";
 
 export interface TerminRadarStatisticsStackProperties extends cdk.StackProps {
 }
@@ -26,8 +27,10 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
             functionName: 'TerminRadarStatisticsFunction',
             description: "Lambda function that extracts statistics from the termin-radar repository and sends them to a Telegram channel",
             runtime: lambda.Runtime.PYTHON_3_13,
+            architecture: Architecture.ARM_64,
             timeout: cdk.Duration.seconds(30),
             handler: 'index.handler',
+            layers: [getPowertoolsLayer(this)],
             code: lambda.Code.fromAsset(path.join(__dirname, 'lambda'), {
                 bundling: {
                     image: lambda.Runtime.PYTHON_3_13.bundlingImage,
@@ -74,7 +77,7 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
             ruleName: `Trigger${terminRadarStatisticsFunction.functionName}Rule`,
             schedule: events.Schedule.cron({
                 minute: '0',
-                hour: '10'
+                hour: '11'
             }),
             targets: [new targets.LambdaFunction(terminRadarStatisticsFunction)],
         });

@@ -1,3 +1,1 @@
 pyTelegramBotAPI==4.29.1
-boto3==1.40.45
-pytz==2025.2
