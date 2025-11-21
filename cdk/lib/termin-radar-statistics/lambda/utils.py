@@ -69,7 +69,7 @@ Emotional guidance for each stat:
 
     response = bedrock.converse(modelId=inference_profile_id,
             messages=conversation,
-            inferenceConfig={"maxTokens": 512, "temperature": 0.7, "topP": 0.9}, )
+            inferenceConfig={"maxTokens": 512, "temperature": 0.7}, )
     return response["output"]["message"]["content"][0]["text"]
 
 if __name__ == '__main__':
