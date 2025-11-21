@@ -20,7 +20,7 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
         const telegramBotTokenParameterName = '/TerminRadar/TelegramBotToken';
 
         const regionPrefix = "eu";
-        const bedRockModelId = 'amazon.nova-micro-v1:0';
+        const bedRockModelId = 'amazon.nova-pro-v1:0';
         const inferenceProfileId = `${regionPrefix}.${bedRockModelId}`;
 
         const terminRadarStatisticsFunction = new lambda.Function(this, `${id}Lambda`, {
@@ -40,7 +40,7 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
             environment: {
                 INFERENCE_PROFILE_ID: inferenceProfileId,
                 SUPPORT_URL: "https://buymeacoffee.com/termin_radar",
-                PAYPAL_SUPPORT_URL: "https://www.paypal.com/pool/9f1bWcE4aK?sr=wccr",
+                PAYPAL_SUPPORT_URL: "https://www.paypal.com/pool/9kerHqIGBe?sr=wccr",
                 PROMOTION_MESSAGE_PARAMETER_NAME: promotionMessageParameterName,
                 TELEGRAM_CHAT_ID_PARAMETER_NAME: telegramChatIdParameterName,
                 TELEGRAM_BOT_TOKEN_PARAMETER_NAME: telegramBotTokenParameterName
