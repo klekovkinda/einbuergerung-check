@@ -20,7 +20,7 @@ export class TerminRadarStatisticsStack extends cdk.Stack {
         const telegramBotTokenParameterName = '/TerminRadar/TelegramBotToken';
 
         const regionPrefix = "eu";
-        const bedRockModelId = 'amazon.nova-micro-v1:0';
+        const bedRockModelId = 'amazon.nova-pro-v1:0';
         const inferenceProfileId = `${regionPrefix}.${bedRockModelId}`;
 
         const terminRadarStatisticsFunction = new lambda.Function(this, `${id}Lambda`, {
