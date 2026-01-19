@@ -2,11 +2,11 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import boto3.dynamodb.conditions
-from dateutil import tz
 import telebot
+from dateutil import tz
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from utils import build_ai_statistics_html_message, get_dynamodb_table, CheckStatus
+from utils import get_dynamodb_table, CheckStatus, build_static_statistics_html_message
 
 def get_users_for_date(date) -> set[str]:
     table = get_dynamodb_table("user_statistic")
@@ -71,20 +71,19 @@ def handler(event, context):
     ssm_client = boto3.client("ssm")
 
     try:
-        promotion_message_parameter = ssm_client.get_parameter(Name=promotion_message_parameter_name, WithDecryption=True)
+        promotion_message_parameter = ssm_client.get_parameter(Name=promotion_message_parameter_name,
+                                                               WithDecryption=True)
         promotion_message = promotion_message_parameter["Parameter"]["Value"]
 
-        telegram_bot_token_parameter = ssm_client.get_parameter(Name=telegram_bot_token_parameter_name, WithDecryption=True)
+        telegram_bot_token_parameter = ssm_client.get_parameter(Name=telegram_bot_token_parameter_name,
+                                                                WithDecryption=True)
         telegram_bot_token = telegram_bot_token_parameter["Parameter"]["Value"]
 
         telegram_chat_id_parameter = ssm_client.get_parameter(Name=telegram_chat_id_parameter_name, WithDecryption=True)
         telegram_chat_id = telegram_chat_id_parameter["Parameter"]["Value"]
     except Exception as e:
         print("Error retrieving configuration from Parameter Store:", e)
-        return {
-                "statusCode": 500,
-                "body": "Failed to retrieve configuration"
-        }
+        return {"statusCode": 500, "body": "Failed to retrieve configuration"}
 
     bot = telebot.TeleBot(telegram_bot_token)
 
@@ -92,15 +91,15 @@ def handler(event, context):
     start_at, finish_at, execution_times, successful_notifications, available_dates, failed_requests = read_yesterday_execution_stats()
 
     if execution_times > 0:
-        html_message = build_ai_statistics_html_message(start_at,
-                                                        finish_at,
-                                                        execution_times,
-                                                        successful_notifications,
-                                                        available_dates,
-                                                        failed_requests,
-                                                        new_users,
-                                                        missing_users,
-                                                        promotion_message=promotion_message)
+        html_message = build_static_statistics_html_message(start_at,
+                                                            finish_at,
+                                                            execution_times,
+                                                            successful_notifications,
+                                                            available_dates,
+                                                            failed_requests,
+                                                            new_users,
+                                                            missing_users,
+                                                            promotion_message=promotion_message)
         keyboard = InlineKeyboardMarkup()
         keyboard.add(InlineKeyboardButton(text="Support the project via credit card", url=support_url))
         keyboard.add(InlineKeyboardButton(text="Support the project via PayPal", url=paypal_support_url))
@@ -111,7 +110,11 @@ def handler(event, context):
         except Exception as e:
             print(f"Failed to unpin messages: {e}")
 
-        sent_message = bot.send_message(telegram_chat_id, html_message, parse_mode="HTML", reply_markup=keyboard, disable_web_page_preview=True)
+        sent_message = bot.send_message(telegram_chat_id,
+                                        html_message,
+                                        parse_mode="HTML",
+                                        reply_markup=keyboard,
+                                        disable_web_page_preview=True)
         print(f"Telegram bot statistic sent with button:\n{html_message}")
 
         try:
