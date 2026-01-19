@@ -42,7 +42,7 @@ export class GhTriggerStack extends cdk.Stack {
         new events.Rule(this, `${id}Rule`, {
             ruleName: `Trigger${runAppointmentCheckGHWorkflowFunction.functionName}Rule`,
             schedule: events.Schedule.cron({
-                minute: '*/2',
+                minute: '*/5',
                 hour: '4-20'
             }),
             targets: [new targets.LambdaFunction(runAppointmentCheckGHWorkflowFunction)],
