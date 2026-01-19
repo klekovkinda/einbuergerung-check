@@ -6,7 +6,7 @@ from dateutil import tz
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from utils import build_statistics_html_message, get_dynamodb_table, CheckStatus
+from utils import build_ai_statistics_html_message, get_dynamodb_table, CheckStatus
 
 def get_users_for_date(date) -> set[str]:
     table = get_dynamodb_table("user_statistic")
@@ -92,15 +92,15 @@ def handler(event, context):
     start_at, finish_at, execution_times, successful_notifications, available_dates, failed_requests = read_yesterday_execution_stats()
 
     if execution_times > 0:
-        html_message = build_statistics_html_message(start_at,
-                                                     finish_at,
-                                                     execution_times,
-                                                     successful_notifications,
-                                                     available_dates,
-                                                     failed_requests,
-                                                     new_users,
-                                                     missing_users,
-                                                     promotion_message=promotion_message)
+        html_message = build_ai_statistics_html_message(start_at,
+                                                        finish_at,
+                                                        execution_times,
+                                                        successful_notifications,
+                                                        available_dates,
+                                                        failed_requests,
+                                                        new_users,
+                                                        missing_users,
+                                                        promotion_message=promotion_message)
         keyboard = InlineKeyboardMarkup()
         keyboard.add(InlineKeyboardButton(text="Support the project via credit card", url=support_url))
         keyboard.add(InlineKeyboardButton(text="Support the project via PayPal", url=paypal_support_url))
