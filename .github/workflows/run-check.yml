@@ -45,17 +45,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      #- name: Restore telegram session
-      #  run: |
-      #    echo "${{ secrets.TERMIN_RADAR_TELEGRAM_SESSION }}" | base64 -d > termin_radar.session
-      #    ls -lh termin_radar.session
-
       - name: Run Einbürgerung Check
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          TERMIN_RADAR_TELEGRAM_SESSION: ${{ secrets.TERMIN_RADAR_TELEGRAM_SESSION }}
           ENCRYPTION_SALT: ${{ secrets.ENCRYPTION_SALT }}
         run: python einbuergerung_check.py
 
