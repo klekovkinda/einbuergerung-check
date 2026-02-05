@@ -12,7 +12,7 @@ ENCRYPTION_SALT = os.getenv("ENCRYPTION_SALT")
 
 
 def get_channel_members(channel_id):
-    with TelegramClient('termin_radar',
+    with TelegramClient(None,
                         TELEGRAM_API_ID,
                         TELEGRAM_API_HASH).start(bot_token=TELEGRAM_BOT_TOKEN) as client:
         participants = []
