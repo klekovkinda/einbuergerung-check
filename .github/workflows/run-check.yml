@@ -45,10 +45,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Restore telegram session
-        run: |
-          echo "${{ secrets.TERMIN_RADAR_TELEGRAM_SESSION }}" | base64 -d > termin_radar.session
-          ls -lh termin_radar.session
+      #- name: Restore telegram session
+      #  run: |
+      #    echo "${{ secrets.TERMIN_RADAR_TELEGRAM_SESSION }}" | base64 -d > termin_radar.session
+      #    ls -lh termin_radar.session
 
       - name: Run Einbürgerung Check
         env:
