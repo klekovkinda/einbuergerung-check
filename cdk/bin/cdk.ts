@@ -3,6 +3,7 @@ import {App} from 'aws-cdk-lib';
 import {GhTriggerStack} from '../lib/gh-trigger/gh-trigger-stack';
 import {TerminRadarDataStack} from '../lib/termin-radar-data/termin-radar-data-stack';
 import {TerminRadarStatisticsStack} from "../lib/termin-radar-statistics/termin-radar-statistics-stack";
+import {TerminRadarCheckStack} from "../lib/termin-radar-check/termin-radar-check-stack";
 
 const app = new App();
 
@@ -25,3 +26,4 @@ new TerminRadarDataStack(app, 'TerminRadarDataStack', {
 
 new TerminRadarStatisticsStack(app, 'TerminRadarStatisticsStack', {});
 
+new TerminRadarCheckStack(app, 'TerminRadarCheckStack', {})

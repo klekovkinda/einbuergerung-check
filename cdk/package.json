@@ -12,8 +12,11 @@
   "devDependencies": {
     "@types/node": "^22.15.12",
     "aws-cdk": "^2.1019.2",
-    "aws-cdk-lib": "^2.0.0",
+    "aws-cdk-lib": "^2.241.0",
     "constructs": "^10.0.0",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "cdk-ecr-deployment": "^4.1.2"
   }
 }
