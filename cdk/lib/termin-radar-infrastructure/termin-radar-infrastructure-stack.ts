@@ -2,15 +2,15 @@ import * as cdk from "aws-cdk-lib";
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import {Construct} from "constructs";
 
-export interface TerminRadarPropertyStackProperties extends cdk.StackProps {
+export interface TerminRadarInfrastructureStackProperties extends cdk.StackProps {
     prefix: string;
     terminRadarServiceProperties: {
         service_name: string; service_url: string; telegram_chat_id: string;
     }[]
 }
 
-export class TerminRadarPropertyStack extends cdk.Stack {
-    constructor(scope: Construct, id: string, props: TerminRadarPropertyStackProperties) {
+export class TerminRadarInfrastructureStack extends cdk.Stack {
+    constructor(scope: Construct, id: string, props: TerminRadarInfrastructureStackProperties) {
         super(scope, id, props);
         const keys: string[] = ["service_url", "telegram_chat_id"];
 

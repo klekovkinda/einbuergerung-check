@@ -6,7 +6,7 @@ import {TerminRadarStatisticsStack} from "../lib/termin-radar-statistics/termin-
 import {TerminRadarCheckStack} from "../lib/termin-radar-check/termin-radar-check-stack";
 import {Schedule} from "aws-cdk-lib/aws-events/lib/schedule";
 import * as events from "aws-cdk-lib/aws-events";
-import {TerminRadarPropertyStack} from "../lib/termin-radar-property/termin-radar-property-stack";
+import {TerminRadarInfrastructureStack} from "../lib/termin-radar-infrastructure/termin-radar-infrastructure-stack";
 
 const app = new App();
 
@@ -31,14 +31,14 @@ const terminRadarServiceProperties: TerminRadarServiceProperty[] = [{
     })
 }]
 
+new TerminRadarInfrastructureStack(app, 'TerminRadarInfrastructureStack', {
+    prefix: propertyPrefix, terminRadarServiceProperties: terminRadarServiceProperties
+});
+
 new GhTriggerStack(app, 'GhTriggerStack', {
     env: {
         account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION,
     },
-});
-
-new TerminRadarPropertyStack(app, 'TerminRadarPropertyStack', {
-    prefix: propertyPrefix, terminRadarServiceProperties: terminRadarServiceProperties
 });
 
 new TerminRadarDataStack(app, 'TerminRadarDataStack', {
