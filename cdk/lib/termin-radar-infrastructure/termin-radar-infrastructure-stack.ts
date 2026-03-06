@@ -9,7 +9,7 @@ import {camelize, pascalize} from "humps";
 export interface TerminRadarInfrastructureStackProperties extends cdk.StackProps {
     domain: string;
     terminRadarServiceProperties: {
-        serviceName: string; serviceUrl: string; telegramChatId: string;
+        serviceName: string; serviceUrl: string; telegramChatId: string; servicePageAnalyzeAlgorithm: string;
     }[]
 }
 
@@ -24,7 +24,7 @@ export class TerminRadarInfrastructureStack extends cdk.Stack {
         const region = Stack.of(this).region;
 
         // Create SSM parameters for each service
-        const keys: string[] = ["service-url", "telegram-chat-id"];
+        const keys: string[] = ["service-url", "telegram-chat-id", "service-page-analyze-algorithm"];
         props.terminRadarServiceProperties.forEach(serviceParameter => {
             keys.forEach(propertyKey => {
                 new ssm.StringParameter(this, pascalize(`${serviceParameter.serviceName}-property-${propertyKey}`), {

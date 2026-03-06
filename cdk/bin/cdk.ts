@@ -14,6 +14,7 @@ const app = new App();
 export interface TerminRadarServiceProperty {
     serviceName: string;
     serviceUrl: string;
+    servicePageAnalyzeAlgorithm: string;
     telegramChatId: string;
     triggerCheckSchedule: Schedule;
     triggerStatisticSchedule: Schedule;
@@ -23,6 +24,7 @@ const domain = "termin-radar";
 const terminRadarServiceProperties: TerminRadarServiceProperty[] = [{
     serviceName: 'einbuergerungstest',
     serviceUrl: 'https://service.berlin.de/terminvereinbarung/termin/all/351180/',
+    servicePageAnalyzeAlgorithm: 'service.berlin.de',
     telegramChatId: '@einbuergerungtest_termin_radar',
     triggerCheckSchedule: events.Schedule.cron({
         minute: '0', hour: '11'
