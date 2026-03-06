@@ -78,12 +78,11 @@ export class TerminRadarCheckStepFunctionBuilder {
             .otherwise(algorithmNotSupported);
 
         for (const algorithm of this.props.algorithmsFunctions.keys()) {
-            const lambdaFunction = this.props.algorithmsFunctions.get(algorithm)!;
-
-            const algorithmTask = new tasks.LambdaInvoke(this.scope, pascalize(lambdaFunction.functionName), {
-                stateName: pascalize(lambdaFunction.functionName),
+            const algorithmLambdaFunction = this.props.algorithmsFunctions.get(algorithm)!;
+            const algorithmTask = new tasks.LambdaInvoke(this.scope, pascalize(algorithmLambdaFunction.functionName), {
+                stateName: pascalize(algorithmLambdaFunction.functionName),
                 comment: 'Call Lambda function to load service page and store content into S3 bucket',
-                lambdaFunction: lambdaFunction,
+                lambdaFunction: algorithmLambdaFunction,
                 outputs: "{% $merge([$states.input, $states.result.Payload]) %}",
                 queryLanguage: sfn.QueryLanguage.JSONATA
             });
