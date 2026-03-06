@@ -40,7 +40,7 @@ export class TerminRadarCheckStack extends cdk.Stack {
                 schedule: serviceProperty.triggerCheckSchedule,
                 targets: [new targets.SfnStateMachine(terminRadarCheckStepFunction, {
                     input: events.RuleTargetInput.fromObject({
-                        serviceName: serviceProperty.serviceName,
+                        service_name: serviceProperty.serviceName,
                     })
                 })],
             });
