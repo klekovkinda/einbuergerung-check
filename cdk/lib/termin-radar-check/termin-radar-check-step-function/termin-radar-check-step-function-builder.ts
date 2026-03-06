@@ -5,12 +5,14 @@ import * as cdk from "aws-cdk-lib";
 import {Stack} from "aws-cdk-lib";
 import * as tasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import {IFunction} from "aws-cdk-lib/aws-lambda/lib/function-base";
+import {pascalize} from "humps";
 
 
 export interface TerminRadarCheckStepFunctionBuilderProperties {
     domain: string;
     serviceNames: string[];
-    loadServicePageLambdaFunction: IFunction
+    loadServicePageLambdaFunction: IFunction;
+    algorithmsFunctions: Map<string, IFunction>;
 }
 
 export class TerminRadarCheckStepFunctionBuilder {
@@ -27,8 +29,8 @@ export class TerminRadarCheckStepFunctionBuilder {
     }
 
     public build(): IStateMachine {
-
         const getServiceParamURLTask = new tasks.CallAwsService(this.scope, 'GetServiceParamServiceUrl', {
+            stateName: 'GetServiceParamServiceUrl',
             comment: 'Get service parameter service-url from SSM Parameter Store',
             iamResources: this.serviceParamUrlListAccess,
             iamAction: 'ssm:GetParameter',
@@ -42,12 +44,15 @@ export class TerminRadarCheckStepFunctionBuilder {
         });
 
         const loadServicePageTask = new tasks.LambdaInvoke(this.scope, 'LoadServicePage', {
+            stateName: 'LoadServicePage',
+            comment: 'Call Lambda function to load service page and store content into S3 bucket',
             lambdaFunction: this.props.loadServicePageLambdaFunction,
             outputs: "{% $merge([$states.input, $states.result.Payload]) %}",
             queryLanguage: sfn.QueryLanguage.JSONATA
         });
 
         const getServiceParamServicePageAnalyzeAlgorithmTask = new tasks.CallAwsService(this.scope, 'GetServiceParamServicePageAnalyzeAlgorithm', {
+            stateName: "GetServiceParamServicePageAnalyzeAlgorithm",
             comment: 'Get service parameter service-page-analyze-algorithm from SSM Parameter Store',
             iamResources: this.serviceParamPageAnalyzeAlgorithmListAccess,
             iamAction: 'ssm:GetParameter',
@@ -60,9 +65,33 @@ export class TerminRadarCheckStepFunctionBuilder {
             queryLanguage: sfn.QueryLanguage.JSONATA
         });
 
-        //TODO add step to get param page_parser so we can call different parser for different service if needed in the future
+        const algorithmNotSupported = new sfn.Fail(this.scope, 'AlgorithmNotSupported', {
+            error: "AlgorithmNotSupported",
+            cause: "The page analyze algorithm is not supported or failed to get from SSM Parameter Store"
+        });
 
-        const terminRadarCheckStepFunctionLogGroup = new logs.LogGroup(this.scope, 'TerminRadarCheckStepFunctionLogGroup', {
+        const choiceServicePageAnalyzeAlgorithm = new sfn.Choice(this.scope, 'ChoiceServicePageAnalyzeAlgorithm', {
+            comment: 'Coose page analyze algorithm based on service parameter',
+            stateName: 'ChoiceServicePageAnalyzeAlgorithm',
+            queryLanguage: sfn.QueryLanguage.JSONATA
+        })
+            .otherwise(algorithmNotSupported);
+
+        for (const algorithm of this.props.algorithmsFunctions.keys()) {
+            const lambdaFunction = this.props.algorithmsFunctions.get(algorithm)!;
+
+            const algorithmTask = new tasks.LambdaInvoke(this.scope, pascalize(lambdaFunction.functionName), {
+                stateName: pascalize(lambdaFunction.functionName),
+                comment: 'Call Lambda function to load service page and store content into S3 bucket',
+                lambdaFunction: lambdaFunction,
+                outputs: "{% $merge([$states.input, $states.result.Payload]) %}",
+                queryLanguage: sfn.QueryLanguage.JSONATA
+            });
+            choiceServicePageAnalyzeAlgorithm.when(sfn.Condition.jsonata(`{% $states.input.page_analyze_algorithm in "${algorithm}" %}`), algorithmTask)
+        }
+
+
+        const terminRadarCheckStepFunctionLogGroup = new logs.LogGroup(this.scope, pascalize(`${this.props.domain}CheckStepFunctionLogGroup`), {
             logGroupName: `/aws/stateMachine/${this.stateMachineName}`,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
             retention: logs.RetentionDays.FIVE_DAYS,
@@ -70,7 +99,7 @@ export class TerminRadarCheckStepFunctionBuilder {
 
         return new sfn.StateMachine(this.scope, 'CheckStepFunction', {
             stateMachineName: `${this.props.domain}-check-step-function`,
-            definitionBody: sfn.DefinitionBody.fromChainable(sfn.Chain.start(getServiceParamURLTask.next(loadServicePageTask.next(getServiceParamServicePageAnalyzeAlgorithmTask)))),
+            definitionBody: sfn.DefinitionBody.fromChainable(sfn.Chain.start(getServiceParamURLTask.next(loadServicePageTask.next(getServiceParamServicePageAnalyzeAlgorithmTask.next(choiceServicePageAnalyzeAlgorithm))))),
             timeout: cdk.Duration.minutes(5),
             tracingEnabled: true,
             logs: {

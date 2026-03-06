@@ -10,6 +10,7 @@ import {
 import {
     TerminRadarCheckStepFunctionBuilder
 } from "./termin-radar-check-step-function/termin-radar-check-step-function-builder";
+import {TerminRadarAlgorithmsBuilder} from "./termin-radar-algorithms/termin-radar-algorithms-builder";
 
 export interface TerminRadarCheckStackProperties extends cdk.StackProps {
     domain: string,
@@ -30,8 +31,16 @@ export class TerminRadarCheckStack extends cdk.Stack {
             domain: props.domain, shortTermBucket: props.shortTermBucket, serviceNames: serviceNames
         }).build()
 
+        //Create algorithms
+        const algorithmsFunctions = new TerminRadarAlgorithmsBuilder(this, props.domain).build();
+
         //Create check Step Function
-        const terminRadarCheckStepFunction = new TerminRadarCheckStepFunctionBuilder(this, {domain: props.domain, serviceNames: serviceNames, loadServicePageLambdaFunction: terminRadarLoadServicePageLambdaFunction}).build()
+        const terminRadarCheckStepFunction = new TerminRadarCheckStepFunctionBuilder(this, {
+            domain: props.domain,
+            serviceNames: serviceNames,
+            loadServicePageLambdaFunction: terminRadarLoadServicePageLambdaFunction,
+            algorithmsFunctions: algorithmsFunctions
+        }).build()
 
         //create check triggers for each service
         props.terminRadarServiceProperties.forEach(serviceProperty => {

@@ -5,7 +5,7 @@ import {IBucket} from "aws-cdk-lib/aws-s3/lib/bucket";
 import {Architecture, DockerImageCode, DockerImageFunction} from "aws-cdk-lib/aws-lambda";
 import path from "path";
 import {IFunction} from "aws-cdk-lib/aws-lambda/lib/function-base";
-import {pascalize} from "humps";
+import * as logs from "aws-cdk-lib/aws-logs";
 
 
 export interface TerminRadarLoadServicePageLambdaFunctionBuilderProperties {
@@ -21,8 +21,11 @@ export class TerminRadarLoadServicePageLambdaFunctionBuilder {
 
     public build(): IFunction {
         const lambdaDir = path.join(__dirname, 'lambda');
-        const loadServicePageLambdaFunction = new DockerImageFunction(this.scope, pascalize(`LoadServicePageLambdaFunction`), {
-            functionName: `${this.props.domain}-load-service-page-lambda-function`,
+
+        const lambdaName = `${this.props.domain}-load-service-page-lambda-function`
+
+        const loadServicePageLambdaFunction = new DockerImageFunction(this.scope, 'LoadServicePageLambdaFunction', {
+            functionName: lambdaName,
             description: "Lambda function that load the page and store content into S3 bucket",
             code: DockerImageCode.fromImageAsset(lambdaDir),
             memorySize: 1024,
@@ -31,7 +34,7 @@ export class TerminRadarLoadServicePageLambdaFunctionBuilder {
             environment: {
                 S3_SHORT_TERM_BUCKET_NAME: this.props.shortTermBucket.bucketName,
                 POWERTOOLS_SERVICE_NAME: `${this.props.domain}-load-service-page-lambda-function`,
-                LOG_LEVEL: "debug",
+                POWERTOOLS_LOG_LEVEL: 'DEBUG'
             }
         });
 
