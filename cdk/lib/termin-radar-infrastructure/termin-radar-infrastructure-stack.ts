@@ -4,11 +4,12 @@ import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import {Construct} from "constructs";
 import {IBucket} from "aws-cdk-lib/aws-s3/lib/bucket";
+import {camelize, pascalize} from "humps";
 
 export interface TerminRadarInfrastructureStackProperties extends cdk.StackProps {
-    prefix: string;
+    domain: string;
     terminRadarServiceProperties: {
-        service_name: string; service_url: string; telegram_chat_id: string;
+        serviceName: string; serviceUrl: string; telegramChatId: string;
     }[]
 }
 
@@ -23,23 +24,23 @@ export class TerminRadarInfrastructureStack extends cdk.Stack {
         const region = Stack.of(this).region;
 
         // Create SSM parameters for each service
-        const keys: string[] = ["service_url", "telegram_chat_id"];
+        const keys: string[] = ["service-url", "telegram-chat-id"];
         props.terminRadarServiceProperties.forEach(serviceParameter => {
             keys.forEach(propertyKey => {
-                new ssm.StringParameter(this, `${serviceParameter.service_name}-${propertyKey}`, {
-                    parameterName: `/${props.prefix}/${serviceParameter.service_name}/${propertyKey}`,
-                    stringValue: serviceParameter[propertyKey as keyof typeof serviceParameter]
+                new ssm.StringParameter(this, pascalize(`${serviceParameter.serviceName}-property-${propertyKey}`), {
+                    parameterName: `/${props.domain}/${serviceParameter.serviceName}/${propertyKey}`,
+                    stringValue: serviceParameter[camelize(propertyKey) as keyof typeof serviceParameter]
                 });
             })
         })
 
         // Create S3 Bucket for short-term data of services
         this.shortTermBucket = new s3.Bucket(this, 'ShortTermBucket', {
-            bucketName: `short-term-bucket-${account}-${region}`,
+            bucketName: `${props.domain}-short-term-bucket-${account}-${region}`,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
             autoDeleteObjects: true,
             lifecycleRules: [{
-                id: 'ExpireObjectsAfter1Day',
+                id: 'expire-objects-after-1-day',
                 enabled: true,
                 expiration: Duration.days(1),
                 abortIncompleteMultipartUploadAfter: Duration.days(1),
@@ -48,7 +49,7 @@ export class TerminRadarInfrastructureStack extends cdk.Stack {
 
         // Create S3 Bucket for long-term data of services
         this.longTermBucket = new s3.Bucket(this, 'LongTermBucket', {
-            bucketName: `long-term-bucket-${account}-${region}`,
+            bucketName: `${props.domain}-long-term-bucket-${account}-${region}`,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
             autoDeleteObjects: false,
         });

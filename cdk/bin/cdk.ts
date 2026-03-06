@@ -7,32 +7,33 @@ import {TerminRadarCheckStack} from "../lib/termin-radar-check/termin-radar-chec
 import {Schedule} from "aws-cdk-lib/aws-events/lib/schedule";
 import * as events from "aws-cdk-lib/aws-events";
 import {TerminRadarInfrastructureStack} from "../lib/termin-radar-infrastructure/termin-radar-infrastructure-stack";
+import {pascalize} from "humps";
 
 const app = new App();
 
 export interface TerminRadarServiceProperty {
-    service_name: string;
-    service_url: string;
-    telegram_chat_id: string;
-    trigger_check_schedule: Schedule;
-    trigger_statistic_schedule: Schedule;
+    serviceName: string;
+    serviceUrl: string;
+    telegramChatId: string;
+    triggerCheckSchedule: Schedule;
+    triggerStatisticSchedule: Schedule;
 }
 
-const propertyPrefix = "TerminRadar";
+const domain = "termin-radar";
 const terminRadarServiceProperties: TerminRadarServiceProperty[] = [{
-    service_name: 'EinbuergerungtestTerminRadar',
-    service_url: 'https://service.berlin.de/terminvereinbarung/termin/all/351180/',
-    telegram_chat_id: '@einbuergerungtest_termin_radar',
-    trigger_check_schedule: events.Schedule.cron({
+    serviceName: 'einbuergerungstest',
+    serviceUrl: 'https://service.berlin.de/terminvereinbarung/termin/all/351180/',
+    telegramChatId: '@einbuergerungtest_termin_radar',
+    triggerCheckSchedule: events.Schedule.cron({
         minute: '0', hour: '11'
     }),
-    trigger_statistic_schedule: events.Schedule.cron({
+    triggerStatisticSchedule: events.Schedule.cron({
         minute: '0', hour: '11'
     })
 }]
 
-new TerminRadarInfrastructureStack(app, 'TerminRadarInfrastructureStack', {
-    prefix: propertyPrefix, terminRadarServiceProperties: terminRadarServiceProperties
+const infrastructure = new TerminRadarInfrastructureStack(app, pascalize(`${domain}InfrastructureStack`), {
+    domain: domain, terminRadarServiceProperties: terminRadarServiceProperties
 });
 
 new GhTriggerStack(app, 'GhTriggerStack', {
@@ -50,8 +51,9 @@ new TerminRadarDataStack(app, 'TerminRadarDataStack', {
 
 new TerminRadarStatisticsStack(app, 'TerminRadarStatisticsStack', {});
 
-new TerminRadarCheckStack(app, 'TerminRadarCheckStack', {
-    propertyPrefix:propertyPrefix,
-    terminRadarServiceProperties: terminRadarServiceProperties
+new TerminRadarCheckStack(app, pascalize(`${domain}CheckStack`), {
+    domain: domain,
+    terminRadarServiceProperties: terminRadarServiceProperties,
+    shortTermBucket: infrastructure.shortTermBucket,
 })
 

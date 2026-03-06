@@ -1,54 +1,46 @@
 import * as cdk from "aws-cdk-lib";
 import {Construct} from "constructs";
-import {Architecture, DockerImageCode, DockerImageFunction} from "aws-cdk-lib/aws-lambda";
-import path from "path";
 import * as events from "aws-cdk-lib/aws-events";
-import * as iam from "aws-cdk-lib/aws-iam";
 import * as targets from "aws-cdk-lib/aws-events-targets";
+import {IBucket} from "aws-cdk-lib/aws-s3/lib/bucket";
+import {pascalize} from "humps";
+import {
+    TerminRadarLoadServicePageLambdaFunctionBuilder
+} from "./termin-radar-load-service-page-lambda-function/termin-radar-load-service-page-lambda-function-builder";
+import {
+    TerminRadarCheckStepFunctionBuilder
+} from "./termin-radar-check-step-function/termin-radar-check-step-function-builder";
 
 export interface TerminRadarCheckStackProperties extends cdk.StackProps {
-    propertyPrefix: string,
+    domain: string,
+    shortTermBucket: IBucket,
     terminRadarServiceProperties: {
-        service_name: string
-        trigger_check_schedule: events.Schedule
+        serviceName: string
+        triggerCheckSchedule: events.Schedule
     }[]
 }
 
 export class TerminRadarCheckStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props: TerminRadarCheckStackProperties) {
         super(scope, id, props);
-        const lambdaDir = path.join(__dirname, 'lambda');
 
-        const terminRadarCheckFunction = new DockerImageFunction(this, `Lambda`, {
-            functionName: 'TerminRadarCheckFunction',
-            description: "Lambda function that load the page and analysis the content to check if there are new appointments available",
-            code: DockerImageCode.fromImageAsset(lambdaDir),
-            memorySize: 2048,
-            timeout: cdk.Duration.seconds(60),
-            architecture: Architecture.X86_64,
-            environment: {
-                PROPERTY_PREFIX: props.propertyPrefix,
-                POWERTOOLS_SERVICE_NAME: 'TerminRadarCheckFunction',
-                LOG_LEVEL: "debug"
-            }
-        });
+        const serviceNames = props.terminRadarServiceProperties.map(serviceProperty => serviceProperty.serviceName)
 
-        //Add policy to read SSM parameters
+        const terminRadarLoadServicePageLambdaFunction = new TerminRadarLoadServicePageLambdaFunctionBuilder(this, {
+            domain: props.domain, shortTermBucket: props.shortTermBucket, serviceNames: serviceNames
+        }).build()
+
+        //Create check Step Function
+        const terminRadarCheckStepFunction = new TerminRadarCheckStepFunctionBuilder(this, {domain: props.domain, serviceNames: serviceNames, loadServicePageLambdaFunction: terminRadarLoadServicePageLambdaFunction}).build()
+
+        //create check triggers for each service
         props.terminRadarServiceProperties.forEach(serviceProperty => {
-            `${props.propertyPrefix}/${serviceProperty.service_name}/*`
-            terminRadarCheckFunction.addToRolePolicy(new iam.PolicyStatement({
-                actions: ['ssm:GetParameter'],
-                resources: [`arn:aws:ssm:${this.region}:${this.account}:parameter/${props.propertyPrefix}/${serviceProperty.service_name}/*`]
-            }));
-        })
-
-        props.terminRadarServiceProperties.forEach(serviceProperty => {
-            new events.Rule(this, `Check${serviceProperty.service_name}Rule`, {
-                ruleName: `TriggerCheck${serviceProperty.service_name}Rule`,
-                schedule: serviceProperty.trigger_check_schedule,
-                targets: [new targets.LambdaFunction(terminRadarCheckFunction, {
-                    event: events.RuleTargetInput.fromObject({
-                        service_name: serviceProperty.service_name,
+            new events.Rule(this, `TriggerCheck${pascalize(serviceProperty.serviceName)}Rule`, {
+                ruleName: `${props.domain}-trigger-${serviceProperty.serviceName}-check-step-function-rule`,
+                schedule: serviceProperty.triggerCheckSchedule,
+                targets: [new targets.SfnStateMachine(terminRadarCheckStepFunction, {
+                    input: events.RuleTargetInput.fromObject({
+                        serviceName: serviceProperty.serviceName,
                     })
                 })],
             });
