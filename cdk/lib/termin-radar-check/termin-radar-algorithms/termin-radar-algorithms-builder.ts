@@ -5,9 +5,10 @@ import * as cdk from 'aws-cdk-lib';
 import {Duration} from 'aws-cdk-lib';
 import path from "path";
 import {Construct} from "constructs";
+import {IBucket} from "aws-cdk-lib/aws-s3/lib/bucket";
 
 export class TerminRadarAlgorithmsBuilder {
-    constructor(private scope: Construct, private domain: string) {
+    constructor(private scope: Construct, private domain: string, private serviceNames: string[], private shortTermBucket: IBucket) {
     }
 
     public build(): Map<string, IFunction> {
@@ -18,7 +19,6 @@ export class TerminRadarAlgorithmsBuilder {
         const lambdaCode = this.createLambdaAsset(this.scope, sourcePath);
 
         //service.berlin.de algorithm lambda function
-
         const algorithmServiceBerlinDeLambdaFunctionName = `${this.domain}-algorithm-service-berlin-de-lambda-function`;
 
         const algorithmServiceBerlinDeLambdaFunction = new lambda.Function(this.scope, 'AlgorithmServiceBerlinDeLambdaFunction', {
@@ -37,6 +37,12 @@ export class TerminRadarAlgorithmsBuilder {
             tracing: lambda.Tracing.ACTIVE,
             layers: [powertoolsLayer]
         });
+
+        const s3BucketResources = this.serviceNames.map(serviceName => `${this.shortTermBucket.bucketArn}/${serviceName}/*`);
+        algorithmServiceBerlinDeLambdaFunction.addToRolePolicy(new cdk.aws_iam.PolicyStatement({
+            actions: ['s3:GetObject'],
+            resources: s3BucketResources
+        }));
 
         const algorithmsMap = new Map<string, IFunction>();
         algorithmsMap.set("service.berlin.de", algorithmServiceBerlinDeLambdaFunction);

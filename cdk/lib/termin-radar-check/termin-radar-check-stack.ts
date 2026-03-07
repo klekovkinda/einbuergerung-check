@@ -32,7 +32,7 @@ export class TerminRadarCheckStack extends cdk.Stack {
         }).build()
 
         //Create algorithms
-        const algorithmsFunctions = new TerminRadarAlgorithmsBuilder(this, props.domain).build();
+        const algorithmsFunctions = new TerminRadarAlgorithmsBuilder(this, props.domain, serviceNames, props.shortTermBucket).build();
 
         //Create check Step Function
         const terminRadarCheckStepFunction = new TerminRadarCheckStepFunctionBuilder(this, {
