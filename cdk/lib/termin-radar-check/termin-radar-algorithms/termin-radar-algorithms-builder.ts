@@ -52,6 +52,15 @@ export class TerminRadarAlgorithmsBuilder {
     private createLambdaAsset = (scope: Construct, source_path: string): AssetCode => {
         return lambda.Code.fromAsset(source_path, {
             exclude: ['*', '.*', `!*.py`], ignoreMode: cdk.IgnoreMode.GLOB,
+            bundling: {
+                image: lambda.Runtime.PYTHON_3_13.bundlingImage,
+                command: [
+                    "bash",
+                    "-c",
+                    "pip install --no-cache -r requirements.txt -t /asset-output && cp -au . /asset-output",
+                ],
+            },
+
         });
     };
 }
